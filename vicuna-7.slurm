@@ -14,8 +14,8 @@ cd /p/haicluster/llama/FastChat
 source sc_venv_template/activate.sh
 
 # We use model-names to fool langchain, which expects model names from OpenAI
-# This fucks up with the web server, as seen in https://github.com/lm-sys/FastChat/issues/1947
-OPENAI_API_KEY=EMPTY srun python3 -m fastchat.serve.model_worker \
+# This messes up with the web server, as seen in https://github.com/lm-sys/FastChat/issues/1947
+srun python3 -m fastchat.serve.model_worker \
      --controller http://haicluster1.fz-juelich.de:21001 \
      --port 31012 --worker http://$(hostname):31012 \
      --num-gpus 1 \
