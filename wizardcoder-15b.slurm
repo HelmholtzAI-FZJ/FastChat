@@ -14,12 +14,12 @@ cd /p/haicluster/llama/FastChat
 source sc_venv_template/activate.sh
 
 
-srun python3 -m fastchat.serve.model_worker \
+srun python3 fastchat/serve/model_worker.py \
      --controller http://haicluster1.fz-juelich.de:21001 \
      --port 31015 --worker http://$(hostname):31015 \
      --num-gpus 2 \
      --host 0.0.0.0 \
-     --model-path /p/haicluster/llama/FastChat/models/WizardCoder-15B
+     --model-path models/wizardlm-WizardCoder-15B-V1.0 \
+     --model-names "code-davinci-002,WizardCoder-15B-V1.0"
 
 
-#     --max-gpu-memory 22Gb \
