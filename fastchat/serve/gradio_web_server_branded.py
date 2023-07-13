@@ -516,7 +516,7 @@ def build_single_model_ui(models):
 
     chatbot = gr.Chatbot(
         elem_id="chatbot",
-        label="This is what I have to say....",
+        label="This is what I have to say.... Remember: I am a BLABLADOR! Don't trust these answers!",
         visible=True,
         height=550,
     )
