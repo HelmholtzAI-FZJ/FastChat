@@ -13,6 +13,9 @@ echo "I AM ON "$(hostname) " running vicuna 33 with 4 gpus"
 
 cd /p/haicluster/llama/FastChat
 source sc_venv_falcon/activate.sh
+module load NCCL # forces the latest NCCL after the pip env
+
+export NCCL_P2P_DISABLE=1 # 3090s do not support p2p
 
 export HF_HOME=/p/haicluster/llama/FastChat/models/
 
@@ -21,5 +24,5 @@ srun python3 fastchat/serve/vllm_worker.py \
      --port 31011 --worker-address http://$(hostname):31011 \
      --num-gpus 4 \
      --host 0.0.0.0 \
-     --model-path lmsys/vicuna-33b-v1.3 \
+     --model-path models/vicuna-33b-v1.3 \
 #     --max-gpu-memory 23Gb \
