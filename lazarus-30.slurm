@@ -4,7 +4,7 @@
 #SBATCH --error=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=8
 #SBATCH --time=100:00:00
 #SBATCH --gres=gpu:4
 
@@ -20,7 +20,6 @@ srun python3 -m fastchat.serve.model_worker \
      --port 31004 --worker http://$(hostname):31004 \
      --num-gpus 4 \
      --host 0.0.0.0 \
-     --model-path /p/haicluster/llama/FastChat/models/30B-Lazarus
-
-
-#     --max-gpu-memory 22Gb \
+     --model-path /p/haicluster/llama/FastChat/models/30B-Lazarus \
+     # --load-8bit # No benefit, still needs 4 gpus on 18/07/2023
+     # --max-gpu-memory 22Gb \

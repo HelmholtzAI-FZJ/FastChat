@@ -6,7 +6,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=16
 #SBATCH --time=100:00:00
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:1
 
 echo "I AM ON "$(hostname) " running vicuna 13"
 
@@ -17,9 +17,10 @@ source sc_venv_template/activate.sh
 srun python3 -m fastchat.serve.model_worker \
      --controller http://haicluster1.fz-juelich.de:21001 \
      --port 31010 --worker http://$(hostname):31010 \
-     --num-gpus 2 \
+     --num-gpus 1 \
      --host 0.0.0.0 \
-     --model-path /p/haicluster/llama/FastChat/models/vicuna-13b-v1.3
+     --model-path /p/haicluster/llama/FastChat/models/vicuna-13b-v1.3 \
+     --load-8bit
 
 
 #     --max-gpu-memory 22Gb \
