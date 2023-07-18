@@ -30,7 +30,9 @@ tests/state_of_the_union.txt
 # Build
 build
 
-sc_venv_template
 logs/*
 token
-models/hub
+models
+sc_venv_falcon
+sc_venv_vllm
+sc_venv_template
