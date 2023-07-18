@@ -4,7 +4,7 @@
 #SBATCH --error=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=8
 #SBATCH --time=100:00:00
 #SBATCH --gres=gpu:1
 
@@ -20,5 +20,4 @@ srun python3 -m fastchat.serve.model_worker \
      --num-gpus 1 \
      --host 0.0.0.0 \
      --model-path /p/haicluster/llama/FastChat/models/mpt-7b-chat
-
-#     --max-gpu-memory 22Gb \
+     # --max-gpu-memory 22Gb \

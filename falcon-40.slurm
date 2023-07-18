@@ -4,7 +4,7 @@
 #SBATCH --error=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=8
 #SBATCH --time=100:00:00
 #SBATCH --gres=gpu:5
 
@@ -20,5 +20,5 @@ srun python3 -m fastchat.serve.model_worker \
      --port 31002 --worker http://$(hostname):31002 \
      --num-gpus 5 \
      --host 0.0.0.0 \
-     --model-path models/falcon-40b-instruct
-
+     --model-path models/falcon-40b-instruct \
+     # --load-8bit # 8 bit is single-gpu only as of july 2023

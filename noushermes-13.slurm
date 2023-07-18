@@ -17,9 +17,8 @@ source sc_venv_template/activate.sh
 srun python3 -m fastchat.serve.model_worker \
      --controller http://haicluster1.fz-juelich.de:21001 \
      --port 31013 --worker http://$(hostname):31013 \
-     --num-gpus 2 \
+     --num-gpus 1 \
      --host 0.0.0.0 \
-     --model-path /p/haicluster/llama/FastChat/models/Nous-Hermes-13b
-
-
+     --model-path /p/haicluster/llama/FastChat/models/Nous-Hermes-13b \
+     --load-8bit \
 #     --max-gpu-memory 22Gb \

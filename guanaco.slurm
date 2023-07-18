@@ -4,7 +4,7 @@
 #SBATCH --error=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=8
 #SBATCH --time=100:00:00
 #SBATCH --gres=gpu:7
 
@@ -21,4 +21,4 @@ srun python3 -m fastchat.serve.model_worker \
      --num-gpus 7 \
      --host 0.0.0.0 \
      --model-path /p/haicluster/llama/FastChat/models/guanaco-65b-merged \
-     # --load-8bit # Doesn't seem to be making any difference as of 28.06.2023
+     # --load-8bit # No benefit, still needs 7 gpus on 18/07/2023

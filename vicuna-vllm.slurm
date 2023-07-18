@@ -12,12 +12,14 @@
 echo "I AM ON "$(hostname) " running vicuna 33 with 4 gpus"
 
 cd /p/haicluster/llama/FastChat
-source sc_venv_template/activate.sh
+source sc_venv_falcon/activate.sh
 
-srun python3 -m fastchat.serve.model_worker \
+export HF_HOME=/p/haicluster/llama/FastChat/models/
+
+srun python3 fastchat/serve/vllm_worker.py \
      --controller http://haicluster1.fz-juelich.de:21001 \
-     --port 31011 --worker http://$(hostname):31011 \
+     --port 31011 --worker-address http://$(hostname):31011 \
      --num-gpus 4 \
      --host 0.0.0.0 \
-     --model-path models/vicuna-33b-v1.3 \
-     # --max-gpu-memory 23Gb \
+     --model-path lmsys/vicuna-33b-v1.3 \
+#     --max-gpu-memory 23Gb \
