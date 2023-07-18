@@ -32,3 +32,5 @@ build
 
 sc_venv_template
 logs/*
+token
+models/hub
