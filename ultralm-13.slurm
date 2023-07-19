@@ -15,7 +15,7 @@ source sc_venv_template/activate.sh
 
 # This model generates nonsense as of 2021-09-15
 
-srun python3 -m fastchat.serve.model_worker \
+srun python3 fastchat/serve/model_worker.py \
      --controller http://haicluster1.fz-juelich.de:21001 \
      --port 31014 --worker http://$(hostname):31014 \
      --num-gpus 1 \

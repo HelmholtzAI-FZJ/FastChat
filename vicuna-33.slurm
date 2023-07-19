@@ -14,7 +14,7 @@ echo "I AM ON "$(hostname) " running vicuna 33 with 4 gpus"
 cd /p/haicluster/llama/FastChat
 source sc_venv_template/activate.sh
 
-srun python3 -m fastchat.serve.model_worker \
+srun python3 fastchat/serve/model_worker.py \
      --controller http://haicluster1.fz-juelich.de:21001 \
      --port 31011 --worker http://$(hostname):31011 \
      --num-gpus 4 \
