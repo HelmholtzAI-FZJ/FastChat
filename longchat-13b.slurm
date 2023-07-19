@@ -16,7 +16,7 @@ source sc_venv_template/activate.sh
 
 # THIS MODEL DOES NOT WORK PROPERLY YET
 
-srun python3 -m fastchat.serve.model_worker \
+srun python3 fastchat/serve/model_worker.py \
      --controller http://haicluster1.fz-juelich.de:21001 \
      --port 31006 --worker http://$(hostname):31006 \
      --num-gpus 1 \
