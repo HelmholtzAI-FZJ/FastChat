@@ -56,7 +56,7 @@ enable_moderation = False
 
 learn_more_md = """
 ### License
-This is made by Helmholtz AI Jülich.
+This is made by Helmholtz AI Jülich. Get in touch with us at <a href="mailto:blablador@fz-juelich.de">blablador@fz-juelich.de</a>.
 """
 
 blablador = (
@@ -459,6 +459,8 @@ block_css = """
 #leaderboard_dataframe td {
     line-height: 0.1em;
 }
+
+footer {visibility: hidden}
 """
 
 
@@ -516,7 +518,7 @@ def build_single_model_ui(models):
 
     chatbot = gr.Chatbot(
         elem_id="chatbot",
-        label="This is what I have to say.... Remember: I am a BLABLADOR! Don't trust these answers!",
+        label="This is what I have to say.... Remember: I am a BLABLADOR! Not all I say is true or even real",
         visible=True,
         height=550,
     )
@@ -616,8 +618,7 @@ def build_demo(models):
     with gr.Blocks(
         title="BLABLADOR - A funny Helmholtz AI Chat Model",
         theme=gr.themes.Base(),
-        # css=block_css,
-        css="footer {visibility: hidden}",
+        css=block_css,
     ) as demo:
         url_params = gr.JSON(visible=False)
 
