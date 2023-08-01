@@ -9,7 +9,6 @@ python3 -m fastchat.serve.openai_api_server
 """
 import asyncio
 import argparse
-import asyncio
 import json
 import logging
 import os
@@ -70,7 +69,7 @@ conv_template_map = {}
 class AppSettings(BaseSettings):
     # The address of the model controller.
     controller_address: str = "http://localhost:21001"
-    api_keys: List[str] = None
+    api_keys: Optional[List[str]] = None
 
 
 app_settings = AppSettings()

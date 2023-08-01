@@ -25,6 +25,7 @@ from rich.markdown import Markdown
 
 from fastchat.model.model_adapter import add_model_args
 from fastchat.modules.gptq import GptqConfig
+from fastchat.modules.awq import AWQConfig
 from fastchat.serve.inference import ChatIO, chat_loop
 
 
@@ -200,15 +201,20 @@ def main(args):
             args.repetition_penalty,
             args.max_new_tokens,
             chatio,
-            GptqConfig(
+            gptq_config=GptqConfig(
                 ckpt=args.gptq_ckpt or args.model_path,
                 wbits=args.gptq_wbits,
                 groupsize=args.gptq_groupsize,
                 act_order=args.gptq_act_order,
             ),
-            args.revision,
-            args.judge_sent_end,
-            args.debug,
+            awq_config=AWQConfig(
+                ckpt=args.awq_ckpt or args.model_path,
+                wbits=args.awq_wbits,
+                groupsize=args.awq_groupsize,
+            ),
+            revision=args.revision,
+            judge_sent_end=args.judge_sent_end,
+            debug=args.debug,
             history=not args.no_history,
         )
     except KeyboardInterrupt:

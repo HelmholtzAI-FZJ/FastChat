@@ -34,6 +34,7 @@ from fastchat.model.model_adapter import (
     get_generate_stream_function,
 )
 from fastchat.modules.gptq import GptqConfig
+from fastchat.modules.awq import AWQConfig
 from fastchat.utils import is_partial_stop, is_sentence_complete, get_context_length
 
 
@@ -283,23 +284,25 @@ def chat_loop(
     repetition_penalty: float,
     max_new_tokens: int,
     chatio: ChatIO,
-    gptq_config: GptqConfig,
-    revision: str,
-    judge_sent_end: bool,
-    debug: bool,
+    gptq_config: Optional[GptqConfig] = None,
+    awq_config: Optional[AWQConfig] = None,
+    revision: str = "main",
+    judge_sent_end: bool = True,
+    debug: bool = True,
     history: bool = True,
 ):
     # Model
     model, tokenizer = load_model(
         model_path,
-        device,
-        num_gpus,
-        max_gpu_memory,
-        load_8bit,
-        cpu_offloading,
-        gptq_config,
-        revision,
-        debug,
+        device=device,
+        num_gpus=num_gpus,
+        max_gpu_memory=max_gpu_memory,
+        load_8bit=load_8bit,
+        cpu_offloading=cpu_offloading,
+        gptq_config=gptq_config,
+        awq_config=awq_config,
+        revision=revision,
+        debug=debug,
     )
     generate_stream_func = get_generate_stream_function(model, model_path)
 
