@@ -6,10 +6,18 @@ FastChat is an open platform for training, serving, and evaluating large languag
 - A distributed multi-model serving system with web UI and OpenAI-compatible RESTful APIs.
 
 ## News
-- [2023/07] 🔥 We released **Chatbot Arena Conversations**, a dataset containing 33k conversations with human preferences. Download it [here](https://huggingface.co/datasets/lmsys/chatbot_arena_conversations).
+- [2023/08] 🔥 We released **Vicuna v1.5** based on Llama 2 with 4K and 16K context lengths. Download [weights](#vicuna-weights).
+- [2023/08] 🔥 We released **LongChat v1.5** based on Llama 2 with 32K context lengths. Download [weights](#longchat).
+- [2023/07] We released **Chatbot Arena Conversations**, a dataset containing 33k conversations with human preferences. Download it [here](https://huggingface.co/datasets/lmsys/chatbot_arena_conversations).
+
+<details><summary>More</summary>
+
+- [2023/06] We introduced **MT-bench**, a challenging multi-turn question set for evaluating chatbots. Check out the blog [post](https://lmsys.org/blog/2023-06-22-leaderboard/).
 - [2023/06] We introduced **LongChat**, our long-context chatbots and evaluation tools. Check out the blog [post](https://lmsys.org/blog/2023-06-29-longchat/).
 - [2023/05] We introduced **Chatbot Arena** for battles among LLMs. Check out the blog [post](https://lmsys.org/blog/2023-05-03-arena).
 - [2023/03] We released **Vicuna: An Open-Source Chatbot Impressing GPT-4 with 90% ChatGPT Quality**. Check out the blog [post](https://vicuna.lmsys.org).
+
+</details>
 
 <a href="https://chat.lmsys.org"><img src="assets/demo_narrow.gif" width="70%"></a>
 
@@ -47,7 +55,7 @@ brew install rust cmake
 2. Install Package
 ```bash
 pip3 install --upgrade pip  # enable PEP 660 support
-pip3 install -e .
+pip3 install -e ".[model_worker, webui]"
 ```
 
 ## Model Weights
@@ -57,21 +65,24 @@ pip3 install -e .
 You can use the commands below to start chatting. It will automatically download the weights from Hugging Face repos.
 See more command options and how to handle out-of-memory in the "Inference with Command Line Interface" section below.
 
+**NOTE: `transformers>=4.31` is required for 16K versions.**
+
 | Size | Chat Command | Hugging Face Repo |
 | ---  | --- | --- |
-| 7B   | `python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.3`  | [lmsys/vicuna-7b-v1.3](https://huggingface.co/lmsys/vicuna-7b-v1.3)   |
-| 13B  | `python3 -m fastchat.serve.cli --model-path lmsys/vicuna-13b-v1.3` | [lmsys/vicuna-13b-v1.3](https://huggingface.co/lmsys/vicuna-13b-v1.3) |
+| 7B   | `python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5`  | [lmsys/vicuna-7b-v1.5](https://huggingface.co/lmsys/vicuna-7b-v1.5)   |
+| 7B-16k   | `python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5-16k`  | [lmsys/vicuna-7b-v1.5-16k](https://huggingface.co/lmsys/vicuna-7b-v1.5-16k)   |
+| 13B  | `python3 -m fastchat.serve.cli --model-path lmsys/vicuna-13b-v1.5` | [lmsys/vicuna-13b-v1.5](https://huggingface.co/lmsys/vicuna-13b-v1.5) |
+| 13B-16k  | `python3 -m fastchat.serve.cli --model-path lmsys/vicuna-13b-v1.5-16k` | [lmsys/vicuna-13b-v1.5-16k](https://huggingface.co/lmsys/vicuna-13b-v1.5-16k) |
 | 33B  | `python3 -m fastchat.serve.cli --model-path lmsys/vicuna-33b-v1.3` | [lmsys/vicuna-33b-v1.3](https://huggingface.co/lmsys/vicuna-33b-v1.3) |
 
 **Old weights**: see [docs/vicuna_weights_version.md](docs/vicuna_weights_version.md) for all versions of weights and their differences.
 
 ### LongChat
-We release LongChat models under LLaMA's [model license](https://github.com/facebookresearch/llama/blob/main/MODEL_CARD.md).
+We release LongChat models under LLaMA's [model license](https://github.com/facebookresearch/llama/blob/main/LICENSE).
 
 | Size | Chat Command | Hugging Face Repo |
 | ---  | --- | --- |
-| 7B   | `python3 -m fastchat.serve.cli --model-path lmsys/longchat-7b-16k`  | [lmsys/longchat-7b-16k](https://huggingface.co/lmsys/longchat-7b-16k)   |
-| 13B  | `python3 -m fastchat.serve.cli --model-path lmsys/longchat-13b-16k` | [lmsys/longchat-13b-16k](https://huggingface.co/lmsys/longchat-13b-16k) |
+| 7B   | `python3 -m fastchat.serve.cli --model-path lmsys/longchat-7b-32k-v1.5`  | [lmsys/longchat-7b-32k](https://huggingface.co/lmsys/longchat-7b-32k-v1.5)   |
 
 ### FastChat-T5
 You can use the commands below to chat with FastChat-T5. It will automatically download the weights from Hugging Face repos.
