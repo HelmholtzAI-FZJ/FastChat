@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=vicuna33
+#SBATCH --job-name=vic33vllm
 #SBATCH --output=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --error=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --nodes=1
@@ -11,13 +11,18 @@
 
 echo "I AM ON "$(hostname) " running vicuna 33 with 4 gpus"
 
-cd /p/haicluster/llama/FastChat
-source sc_venv_template/activate.sh
+export BLABLADOR_DIR="/p/haicluster/llama/FastChat"
+export LOGDIR=$BLABLADOR_DIR/logs
+export NCCL_P2P_DISABLE=1 # 3090s do not support p2p
 
-srun python3 fastchat/serve/model_worker.py \
+cd $BLABLADOR_DIR
+source $BLABLADOR_DIR/sc_venv_falcon/activate.sh
+
+srun python3 $BLABLADOR_DIR/fastchat/serve/vllm_worker.py \
      --controller http://haicluster1.fz-juelich.de:21001 \
-     --port 31011 --worker http://$(hostname):31011 \
+     --port 31011 --worker-address http://$(hostname):31011 \
      --num-gpus 4 \
      --host 0.0.0.0 \
      --model-path models/vicuna-33b-v1.3 \
+     # --load-8bit
      # --max-gpu-memory 23Gb \
