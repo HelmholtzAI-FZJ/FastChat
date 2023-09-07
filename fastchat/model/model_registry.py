@@ -62,6 +62,12 @@ register_model_info(
     "open foundation and fine-tuned chat models by Meta",
 )
 register_model_info(
+    ["codellama-34b-instruct", "codellama-13b-instruct", "codellama-7b-instruct"],
+    "Code Llama",
+    "https://ai.meta.com/blog/code-llama-large-language-model-coding/",
+    "open foundation models for code by Meta",
+)
+register_model_info(
     [
         "vicuna-33b",
         "vicuna-33b-v1.3",
@@ -75,7 +81,7 @@ register_model_info(
     "a chat assistant fine-tuned from LLaMA on user-shared conversations by LMSYS",
 )
 register_model_info(
-    ["wizardlm-13b"],
+    ["wizardlm-70b", "wizardlm-30b", "wizardlm-13b"],
     "WizardLM",
     "https://github.com/nlpxucan/WizardLM",
     "an instruction-following LLM using evol-instruct by Microsoft",
