@@ -20,7 +20,7 @@ source $BLABLADOR_DIR/sc_venv_vllm/activate.sh
 #srun python3 $BLABLADOR_DIR/fastchat/serve/model_worker.py \
 srun python3 $BLABLADOR_DIR/fastchat/serve/vllm_worker.py \
      --controller http://haicluster1.fz-juelich.de:21001 \
-     --port 31020 --worker-address http://$(hostname):31020 \
+     --port 31024 --worker-address http://$(hostname):31024 \
      --num-gpus 8 \
      --host 0.0.0.0 \
      --model-path /p/haicluster/llama/FastChat/models/Platypus2-70B-instruct \
