@@ -8,7 +8,7 @@
 #SBATCH --time=100:00:00
 #SBATCH --gres=gpu:2
 
-echo "I AM ON "$(hostname) " running Baichuan-13B-Chat"
+echo "I AM ON "$(hostname) " running Baichuan-13B-Chat on 2 gpus"
 
 cd /p/haicluster/llama/FastChat
 source sc_venv_template/activate.sh
