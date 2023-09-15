@@ -8,7 +8,6 @@
 #SBATCH --time=100:00:00
 #SBATCH --gres=gpu:4
 
-
 echo "I AM ON "$(hostname) " running vicuna 33 with 4 gpus"
 
 export BLABLADOR_DIR="/p/haicluster/llama/FastChat"
