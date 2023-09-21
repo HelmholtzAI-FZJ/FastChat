@@ -48,15 +48,17 @@ logger = build_logger("gradio_web_server", "gradio_web_server.log")
 headers = {"User-Agent": "FastChat Client"}
 
 no_change_btn = gr.Button.update()
-enable_btn = gr.Button.update(interactive=True)
+enable_btn = gr.Button.update(interactive=True, visible=True)
 disable_btn = gr.Button.update(interactive=False)
+invisible_btn = gr.Button.update(interactive=False, visible=False)
 
 controller_url = None
 enable_moderation = False
 
 acknowledgment_md = """
+### Acknowledgment
 <div class="image-container">
-    <p> <strong>Acknowledgment: </strong> We thank <a href="https://www.kaggle.com/" target="_blank">Kaggle</a>, <a href="https://mbzuai.ac.ae/" target="_blank">MBZUAI</a>, <a href="https://www.anyscale.com/" target="_blank">AnyScale</a>, and <a href="https://huggingface.co/" target="_blank">HuggingFace</a> for their sponsorship. </p>
+    <p> We thank <a href="https://www.kaggle.com/" target="_blank">Kaggle</a>, <a href="https://mbzuai.ac.ae/" target="_blank">MBZUAI</a>, <a href="https://www.anyscale.com/" target="_blank">AnyScale</a>, and <a href="https://huggingface.co/" target="_blank">HuggingFace</a> for their <a href="https://lmsys.org/donations/" target="_blank">sponsorship</a>. </p>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Kaggle_logo.png/400px-Kaggle_logo.png" alt="Image 1">
     <img src="https://mma.prnewswire.com/media/1227419/MBZUAI_Logo.jpg?p=facebookg" alt="Image 2">
     <img src="https://docs.anyscale.com/site-assets/logo.png" alt="Image 3">
@@ -500,6 +502,8 @@ block_css = """
 #leaderboard_dataframe td {
     line-height: 0.1em;
 }
+#input_box textarea {
+}
 footer {
     display:none !important
 }
@@ -550,9 +554,9 @@ def get_model_description_md(models):
 def build_single_model_ui(models, add_promotion_links=False):
     promotion = (
         """
+- | [GitHub](https://github.com/lm-sys/FastChat) | [Twitter](https://twitter.com/lmsysorg) | [Discord](https://discord.gg/HSWAKCrnFx) |
 - Introducing Llama 2: The Next Generation Open Source Large Language Model. [[Website]](https://ai.meta.com/llama/)
 - Vicuna: An Open-Source Chatbot Impressing GPT-4 with 90% ChatGPT Quality. [[Blog]](https://lmsys.org/blog/2023-03-30-vicuna/)
-- | [GitHub](https://github.com/lm-sys/FastChat) | [Twitter](https://twitter.com/lmsysorg) | [Discord](https://discord.gg/HSWAKCrnFx) |
 """
         if add_promotion_links
         else ""
@@ -594,6 +598,7 @@ By using this service, users are required to agree to the following terms: The s
                 placeholder="Enter your prompt here and press ENTER",
                 visible=False,
                 container=False,
+                elem_id="input_box",
             )
         with gr.Column(scale=1, min_width=50):
             send_btn = gr.Button(value="Send", visible=False, variant="primary")

@@ -25,6 +25,7 @@ from fastchat.serve.gradio_web_server import (
     no_change_btn,
     enable_btn,
     disable_btn,
+    invisible_btn,
     acknowledgment_md,
     ip_expiration_dict,
 )
@@ -63,7 +64,6 @@ def load_demo_side_by_side_anony(models_, url_params):
         + (
             gr.Textbox.update(visible=True),
             gr.Box.update(visible=True),
-            gr.Row.update(visible=True),
             gr.Row.update(visible=True),
             gr.Accordion.update(visible=True),
         )
@@ -148,7 +148,12 @@ def regenerate(state0, state1, request: gr.Request):
 def clear_history(request: gr.Request):
     logger.info(f"clear_history (anony). ip: {request.client.host}")
     return (
-        [None] * num_sides + [None] * num_sides + anony_names + [""] + [disable_btn] * 6
+        [None] * num_sides
+        + [None] * num_sides
+        + anony_names
+        + [""]
+        + [invisible_btn] * 4
+        + [disable_btn] * 2
     )
 
 
@@ -196,7 +201,7 @@ SAMPLING_WEIGHTS = {
     "chatglm-6b": 0.5,
 }
 
-SAMPLING_BOOST_MODELS = ["wizardlm-70b"]
+SAMPLING_BOOST_MODELS = []
 
 model_pairs = []
 model_pairs_weights = []
@@ -372,12 +377,13 @@ def bot_response_multi(
 def build_side_by_side_ui_anony(models):
     notice_markdown = """
 # ⚔️  Chatbot Arena ⚔️ : Benchmarking LLMs in the Wild
+| [Blog](https://lmsys.org/blog/2023-05-03-arena/) | [GitHub](https://github.com/lm-sys/FastChat) | [Paper](https://arxiv.org/abs/2306.05685) | [Dataset](https://huggingface.co/datasets/lmsys/chatbot_arena_conversations) | [Twitter](https://twitter.com/lmsysorg) | [Discord](https://discord.gg/HSWAKCrnFx) |
+
 ### Rules
 - Chat with two anonymous models side-by-side and vote for which one is better!
 - You can do multiple turns of conversations before voting.
 - The names of the models will be revealed after your vote. Conversations with identity keywords (e.g., ChatGPT, Bard, Vicuna) or any votes after the names are revealed will not count towards the leaderboard.
 - Click "Clear history" to start a new round.
-- | [Blog](https://lmsys.org/blog/2023-05-03-arena/) | [GitHub](https://github.com/lm-sys/FastChat) | [Paper](https://arxiv.org/abs/2306.05685) | [Twitter](https://twitter.com/lmsysorg) | [Discord](https://discord.gg/HSWAKCrnFx) |
 
 ### Leaderboard
 See [lmsys/chatbot-arena-leaderboard](https://huggingface.co/spaces/lmsys/chatbot-arena-leaderboard) or the 4th tab above on this page.
@@ -386,7 +392,7 @@ See [lmsys/chatbot-arena-leaderboard](https://huggingface.co/spaces/lmsys/chatbo
 By using this service, users are required to agree to the following terms: The service is a research preview intended for non-commercial use only. It only provides limited safety measures and may generate offensive content. It must not be used for any illegal, harmful, violent, racist, or sexual purposes. **The service collects user dialogue data and reserves the right to distribute it under a Creative Commons Attribution (CC-BY) license.** The demo works better on desktop devices with a wide screen.
 
 ### Battle
-Please scroll down and start chatting. The models include both closed-source models (e.g., ChatGPT) and open-source models (e.g., Llama, Vicuna).
+Please scroll down and start chatting. The models include both closed-source models (e.g., ChatGPT) and open-source models (e.g., Llama).
 """
 
     states = [gr.State() for _ in range(num_sides)]
@@ -398,23 +404,28 @@ Please scroll down and start chatting. The models include both closed-source mod
     with gr.Box(elem_id="share-region-anony"):
         with gr.Row():
             for i in range(num_sides):
-                with gr.Column():
-                    model_selectors[i] = gr.Markdown(anony_names[i])
-
-        with gr.Row():
-            for i in range(num_sides):
                 label = "Model A" if i == 0 else "Model B"
                 with gr.Column():
                     chatbots[i] = gr.Chatbot(
                         label=label, elem_id=f"chatbot", visible=False, height=550
                     )
 
-        with gr.Box() as button_row:
-            with gr.Row():
-                leftvote_btn = gr.Button(value="👈  A is better", interactive=False)
-                rightvote_btn = gr.Button(value="👉  B is better", interactive=False)
-                tie_btn = gr.Button(value="🤝  Tie", interactive=False)
-                bothbad_btn = gr.Button(value="👎  Both are bad", interactive=False)
+        with gr.Row():
+            for i in range(num_sides):
+                with gr.Column():
+                    model_selectors[i] = gr.Markdown(anony_names[i])
+
+        with gr.Row():
+            leftvote_btn = gr.Button(
+                value="👈  A is better", visible=False, interactive=False
+            )
+            rightvote_btn = gr.Button(
+                value="👉  B is better", visible=False, interactive=False
+            )
+            tie_btn = gr.Button(value="🤝  Tie", visible=False, interactive=False)
+            bothbad_btn = gr.Button(
+                value="👎  Both are bad", visible=False, interactive=False
+            )
 
     with gr.Row():
         with gr.Column(scale=20):
@@ -423,13 +434,14 @@ Please scroll down and start chatting. The models include both closed-source mod
                 placeholder="Enter your prompt here and press ENTER",
                 visible=False,
                 container=False,
+                elem_id="input_box",
             )
         with gr.Column(scale=1, min_width=50):
-            send_btn = gr.Button(value="Battle", visible=False, variant="primary")
+            send_btn = gr.Button(value="Send", visible=False, variant="primary")
 
-    with gr.Row() as button_row2:
-        regenerate_btn = gr.Button(value="🔄  Regenerate", interactive=False)
+    with gr.Row() as button_row:
         clear_btn = gr.Button(value="🗑️  Clear history", interactive=False)
+        regenerate_btn = gr.Button(value="🔄  Regenerate", interactive=False)
         share_btn = gr.Button(value="📷  Share")
 
     with gr.Accordion("Parameters", open=False, visible=True) as parameter_row:
@@ -555,6 +567,5 @@ function (a, b, c, d) {
         textbox,
         send_btn,
         button_row,
-        button_row2,
         parameter_row,
     )
