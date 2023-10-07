@@ -520,7 +520,8 @@ def build_single_model_ui(models):
         elem_id="chatbot",
         label="This is what I have to say.... Remember: I am a BLABLADOR! Not all I say is true or even real",
         visible=True,
-        height=550,
+        height=300,
+        scale=2,
     )
     with gr.Row():
         with gr.Column(scale=20):
