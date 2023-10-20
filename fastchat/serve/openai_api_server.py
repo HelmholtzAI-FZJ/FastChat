@@ -100,6 +100,7 @@ async def fetch_remote(url, pload=None, name=None):
 class AppSettings(BaseSettings):
     # The address of the model controller.
     controller_address: str = "http://localhost:21001"
+    authenticator_url = "https://codebase.helmholtz.cloud/api/v4/user"
     api_keys: Optional[List[str]] = None
 
 
@@ -127,6 +128,25 @@ async def check_api_key(
             )
         return token
     else:
+        # If I get here, I can have auth.credentials by calling  curl --header "Authorization: Bearer bla"
+        if auth is not None and auth.credentials is not None:
+            headers = {"PRIVATE-TOKEN": auth.credentials}
+            response = httpx.get(app_settings.authenticator_url, headers=headers)
+            print(response.status_code)
+            if response.status_code == 200:
+                    return auth.credentials
+            else:
+                raise HTTPException(
+                    status_code=401,
+                    detail={
+                        "error": {
+                            "message": "",
+                            "type": "invalid_request_error",
+                            "param": None,
+                            "code": "invalid_api_key",
+                        }
+                    },
+                )
         # api_keys not set; allow all
         return None
 
