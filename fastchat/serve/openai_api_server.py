@@ -120,23 +120,21 @@ async def check_api_key(
         if auth is not None and auth.credentials is not None:
             headers = {"PRIVATE-TOKEN": auth.credentials}
             response = httpx.get(app_settings.authenticator_url, headers=headers)
-            print(response.status_code)
             if response.status_code == 200:
                     return auth.credentials
-            else:
-                raise HTTPException(
-                    status_code=401,
-                    detail={
-                        "error": {
-                            "message": "",
-                            "type": "invalid_request_error",
-                            "param": None,
-                            "code": "invalid_api_key",
-                        }
-                    },
-                )
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": {
+                    "message": "",
+                    "type": "invalid_request_error",
+                    "param": None,
+                    "code": "invalid_api_key",
+                }
+            },
+        )
         # api_keys not set; allow all
-        return None
+        # return None
 
 
 def create_error_response(code: int, message: str) -> JSONResponse:
