@@ -49,6 +49,13 @@ peft_share_base_weights = (
 )
 
 
+ANTHROPIC_MODEL_LIST = (
+    "claude-1",
+    "claude-2",
+    "claude-instant-1",
+)
+
+
 class BaseModelAdapter:
     """The base and the default model adapter."""
 
@@ -611,6 +618,8 @@ class AiroborosAdapter(BaseModelAdapter):
         return False
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
+        if "-3." in model_path or "-3p" in model_path:
+            return get_conv_template("airoboros_v3")
         if "spicyboros" in model_path or re.search(r"-(2\.[2-9]+)", model_path):
             return get_conv_template("airoboros_v2")
         return get_conv_template("airoboros_v1")
@@ -934,7 +943,7 @@ class ClaudeAdapter(BaseModelAdapter):
     """The model adapter for Claude"""
 
     def match(self, model_path: str):
-        return model_path in ["claude-2", "claude-instant-1"]
+        return model_path in ANTHROPIC_MODEL_LIST
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         raise NotImplementedError()
@@ -1540,13 +1549,13 @@ class Lamma2ChineseAdapter(BaseModelAdapter):
         return get_conv_template("llama2-chinese")
 
 
-class VigogneInstructAdapter(BaseModelAdapter):
-    """The model adapter for Vigogne-Instruct (e.g., bofenghuang/vigogne-2-7b-instruct)"""
+class VigogneAdapter(BaseModelAdapter):
+    """The model adapter for vigogne (e.g., bofenghuang/vigogne-2-7b-chat)"""
 
     use_fast_tokenizer = False
 
     def match(self, model_path: str):
-        return "vigogne" in model_path.lower() and "instruct" in model_path.lower()
+        return bool(re.search(r"vigogne|vigostral", model_path, re.I))
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         revision = from_pretrained_kwargs.get("revision", "main")
@@ -1565,35 +1574,11 @@ class VigogneInstructAdapter(BaseModelAdapter):
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
-        return get_conv_template("alpaca")
-
-
-class VigogneChatAdapter(BaseModelAdapter):
-    """The model adapter for Vigogne-Chat (e.g., bofenghuang/vigogne-7b-chat)"""
-
-    use_fast_tokenizer = False
-
-    def match(self, model_path: str):
-        return "vigogne" in model_path.lower() and "chat" in model_path.lower()
-
-    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
-        revision = from_pretrained_kwargs.get("revision", "main")
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path,
-            use_fast=self.use_fast_tokenizer,
-            trust_remote_code=True,
-            revision=revision,
-        )
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            trust_remote_code=True,
-            low_cpu_mem_usage=True,
-            **from_pretrained_kwargs,
-        ).eval()
-        return model, tokenizer
-
-    def get_default_conv_template(self, model_path: str) -> Conversation:
-        return get_conv_template("vigogne-chat")
+        if "chat" in model_path.lower():
+            if "vigostral" in model_path.lower():
+                return get_conv_template("vigogne_chat_v3")
+            return get_conv_template("vigogne_chat_v2")
+        return get_conv_template("vigogne_instruct")
 
 
 class OpenLLaMaOpenInstructAdapter(BaseModelAdapter):
@@ -1672,6 +1657,18 @@ class ZephyrAdapter(BaseModelAdapter):
         return get_conv_template("zephyr")
 
 
+class XwinLMAdapter(BaseModelAdapter):
+    """The model adapter for Xwin-LM V0.1 and V0.2 series of models(e.g., Xwin-LM/Xwin-LM-70B-V0.1)"""
+
+    # use_fast_tokenizer = False
+
+    def match(self, model_path: str):
+        return "xwin-lm" in model_path.lower()
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("vicuna_v1.1")
+
+
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
 register_model_adapter(PeftModelAdapter)
@@ -1725,14 +1722,14 @@ register_model_adapter(AquilaChatAdapter)
 register_model_adapter(BGEAdapter)
 register_model_adapter(E5Adapter)
 register_model_adapter(Lamma2ChineseAdapter)
-register_model_adapter(VigogneInstructAdapter)
-register_model_adapter(VigogneChatAdapter)
+register_model_adapter(VigogneAdapter)
 register_model_adapter(OpenLLaMaOpenInstructAdapter)
 register_model_adapter(ReaLMAdapter)
 register_model_adapter(PhindCodeLlamaAdapter)
 register_model_adapter(CodeLlamaAdapter)
 register_model_adapter(Llama2ChangAdapter)
 register_model_adapter(ZephyrAdapter)
+register_model_adapter(XwinLMAdapter)
 
 # After all adapters, try the default base adapter.
 register_model_adapter(BaseModelAdapter)

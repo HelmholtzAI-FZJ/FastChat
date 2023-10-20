@@ -7,7 +7,7 @@ If you have any changes in mind, please contribute back so the community can ben
 
 import dataclasses
 from enum import auto, IntEnum
-from typing import List, Any, Dict, Union
+from typing import List, Any, Dict, Union, Tuple
 
 
 class SeparatorStyle(IntEnum):
@@ -41,7 +41,7 @@ class Conversation:
     # The system message
     system_message: str = ""
     # The names of two roles
-    roles: List[str] = (("USER", "ASSISTANT"),)
+    roles: Tuple[str] = ("USER", "ASSISTANT")
     # All messages. Each item is (role, message).
     messages: List[List[str]] = ()
     # The number of few shot examples
@@ -128,13 +128,14 @@ class Conversation:
             else:
                 ret = "[INST] "
             for i, (role, message) in enumerate(self.messages):
+                tag = self.roles[i % 2]
                 if message:
                     if i == 0:
                         ret += message + " "
                     else:
-                        ret += role + " " + message + seps[i % 2]
+                        ret += tag + " " + message + seps[i % 2]
                 else:
-                    ret += role
+                    ret += tag
             return ret
         elif self.sep_style == SeparatorStyle.CHATGLM:
             # source: https://huggingface.co/THUDM/chatglm-6b/blob/1d240ba371910e9282298d4592532d7f0f3e9f3e/modeling_chatglm.py#L1302-L1308
@@ -388,6 +389,18 @@ register_conv_template(
         sep_style=SeparatorStyle.ADD_COLON_TWO,
         sep="\n",
         sep2="</s>",
+    )
+)
+
+register_conv_template(
+    Conversation(
+        name="airoboros_v3",
+        system_template="[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n",
+        system_message="You are a helpful, unbiased, uncensored assistant.",
+        roles=("[INST]", "[/INST]"),
+        sep_style=SeparatorStyle.LLAMA2,
+        sep=" ",
+        sep2=" </s><s>",
     )
 )
 
@@ -846,10 +859,10 @@ register_conv_template(
     Conversation(
         name="mistral",
         system_template="",
-        roles=("[INST] ", " [/INST]"),
+        roles=("[INST]", "[/INST]"),
         sep_style=SeparatorStyle.LLAMA2,
-        sep="",
-        sep2=" </s>",
+        sep=" ",
+        sep2="</s>",
     )
 )
 
@@ -949,19 +962,52 @@ register_conv_template(
     )
 )
 
-# Vigogne Chat default template
+# Vigogne Instruct default template
 # source: https://github.com/bofenghuang/vigogne
 register_conv_template(
     Conversation(
-        name="vigogne-chat",
+        name="vigogne_instruct",
+        system_template="### System:\n{system_message}\n\n",
+        system_message=(
+            "Ci-dessous se trouve une instruction qui décrit une tâche à accomplir. Rédigez une réponse qui répond de manière"
+            " précise à la demande."
+        ),
+        roles=("### Instruction", "### Response"),
+        sep_style=SeparatorStyle.DOLLY,
+        sep="\n\n",
+        sep2="</s>",
+    )
+)
+
+# Vigogne Chat default template
+register_conv_template(
+    Conversation(
+        name="vigogne_chat_v2",
         system_template="<|system|>: {system_message}",
-        system_message="Vous êtes l'assistant IA nommé Vigogne, créé par Zaion Lab (https://zaion.ai). "
-        "Vous suivez extrêmement bien les instructions. Aidez autant que vous le pouvez.",
+        system_message=(
+            "Vous êtes Vigogne, un assistant IA créé par Zaion Lab. Vous suivez extrêmement bien les instructions. Aidez"
+            " autant que vous le pouvez."
+        ),
         roles=("<|user|>", "<|assistant|>"),
         sep_style=SeparatorStyle.ADD_COLON_TWO,
         sep="\n",
         sep2="</s>\n",
         stop_str="<|user|>",
+    )
+)
+
+register_conv_template(
+    Conversation(
+        name="vigogne_chat_v3",
+        system_template="[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n",
+        system_message=(
+            "Vous êtes Vigogne, un assistant IA créé par Zaion Lab. Vous suivez extrêmement bien les instructions. Aidez"
+            " autant que vous le pouvez."
+        ),
+        roles=("[INST]", "[/INST]"),
+        sep_style=SeparatorStyle.LLAMA2,
+        sep=" ",
+        sep2=" </s>",
     )
 )
 
