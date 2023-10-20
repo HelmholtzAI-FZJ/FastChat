@@ -17,11 +17,12 @@ cd $BLABLADOR_DIR
 source $BLABLADOR_DIR/sc_venv_template/activate.sh
 
 #srun python3 fastchat/serve/model_worker.py \
-python3 fastchat/serve/model_worker.py \
+python3 $BLABLADOR_DIR/fastchat/serve/model_worker.py \
      --controller $BLABLADOR_CONTROLLER:$BLABLADOR_CONTROLLER_PORT \
      --port 31029 --worker http://$(hostname):31029 \
      --num-gpus 1 \
      --host 0.0.0.0 \
      --model-path models/Mistral-7B-v0.1 \
-     --model-names "copilot-codex,vicuna-7b-v.13" \
-#     --max-gpu-memory 22Gb \
+     --model-names "copilot-codex,Mistral-7B-v0.1" \
+     # --load-8bit It's faster without it 
+     #     --max-gpu-memory 22Gb \
