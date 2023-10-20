@@ -126,11 +126,10 @@ async def check_api_key(
             status_code=401,
             detail={
                 "error": {
-                    "message": "",
+                    "message": "You must provide a valid API key. Obtain one from http://helmholtz.cloud",
                     "type": "invalid_request_error",
                     "param": None,
                     "code": "invalid_api_key",
-                    "detail": "You must provide a valid API key. Obtain one from http://helmholtz.cloud",
                 }
             },
         )
