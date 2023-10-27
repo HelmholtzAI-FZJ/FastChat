@@ -48,7 +48,6 @@ peft_share_base_weights = (
     os.environ.get("PEFT_SHARE_BASE_WEIGHTS", "false").lower() == "true"
 )
 
-
 ANTHROPIC_MODEL_LIST = (
     "claude-1",
     "claude-2",
@@ -79,11 +78,17 @@ class BaseModelAdapter:
             )
         try:
             model = AutoModelForCausalLM.from_pretrained(
-                model_path, low_cpu_mem_usage=True, **from_pretrained_kwargs
+                model_path,
+                low_cpu_mem_usage=True,
+                trust_remote_code=True,
+                **from_pretrained_kwargs,
             )
         except NameError:
             model = AutoModel.from_pretrained(
-                model_path, low_cpu_mem_usage=True, **from_pretrained_kwargs
+                model_path,
+                low_cpu_mem_usage=True,
+                trust_remote_code=True,
+                **from_pretrained_kwargs,
             )
         return model, tokenizer
 
@@ -384,7 +389,7 @@ def add_model_args(parser):
     parser.add_argument(
         "--model-path",
         type=str,
-        default="lmsys/vicuna-7b-v1.3",
+        default="lmsys/vicuna-7b-v1.5",
         help="The path to the weights. This can be a local folder or a Hugging Face repo ID.",
     )
     parser.add_argument(
@@ -572,7 +577,7 @@ class PeftModelAdapter:
 
 
 class VicunaAdapter(BaseModelAdapter):
-    "Model adapter for Vicuna models (e.g., lmsys/vicuna-7b-v1.3)" ""
+    "Model adapter for Vicuna models (e.g., lmsys/vicuna-7b-v1.5)" ""
 
     use_fast_tokenizer = False
 
@@ -1681,6 +1686,18 @@ class XwinLMAdapter(BaseModelAdapter):
         return get_conv_template("vicuna_v1.1")
 
 
+class LemurAdapter(BaseModelAdapter):
+    """The model adapter for OpenLemur/lemur-70b-chat-v1"""
+
+    use_fast_tokenizer = False
+
+    def match(self, model_path: str):
+        return "lemur-70b-chat" in model_path.lower()
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("lemur-70b-chat")
+
+
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
 register_model_adapter(PeftModelAdapter)
@@ -1742,6 +1759,7 @@ register_model_adapter(CodeLlamaAdapter)
 register_model_adapter(Llama2ChangAdapter)
 register_model_adapter(ZephyrAdapter)
 register_model_adapter(XwinLMAdapter)
+register_model_adapter(LemurAdapter)
 
 # After all adapters, try the default base adapter.
 register_model_adapter(BaseModelAdapter)
