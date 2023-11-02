@@ -1362,12 +1362,10 @@ class OpenOrcaAdapter(BaseModelAdapter):
     use_fast_tokenizer = False
 
     def match(self, model_path: str):
-        if "mistral-7b-openorca" in model_path.lower():
-            return get_conv_template("mistral-7b-openorca")
-        elif "openorca" in model_path.lower():
-            return get_conv_template("open-orca")
-        else:
-            return False
+        return (
+            "mistral-7b-openorca" in model_path.lower()
+            or "openorca" in model_path.lower()
+        )
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         revision = from_pretrained_kwargs.get("revision", "main")
@@ -1382,6 +1380,8 @@ class OpenOrcaAdapter(BaseModelAdapter):
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
+        if "mistral-7b-openorca" in model_path.lower():
+            return get_conv_template("mistral-7b-openorca")
         return get_conv_template("open-orca")
 
 
@@ -1420,6 +1420,20 @@ class QwenChatAdapter(BaseModelAdapter):
     def match(self, model_path: str):
         return "qwen" in model_path.lower()
 
+    def float_set(self, config, option):
+        config.bf16 = False
+        config.fp16 = False
+        config.fp32 = False
+
+        if option == "bf16":
+            config.bf16 = True
+        elif option == "fp16":
+            config.fp16 = True
+        elif option == "fp32":
+            config.fp32 = True
+        else:
+            print("Invalid option. Please choose one from 'bf16', 'fp16' and 'fp32'.")
+
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         from transformers.generation import GenerationConfig
 
@@ -1430,7 +1444,7 @@ class QwenChatAdapter(BaseModelAdapter):
         )
         # NOTE: if you use the old version of model file, please remove the comments below
         # config.use_flash_attn = False
-        config.fp16 = True
+        self.float_set(config, "fp16")
         generation_config = GenerationConfig.from_pretrained(
             model_path, trust_remote_code=True
         )
@@ -1518,7 +1532,13 @@ class E5Adapter(BaseModelAdapter):
 
 
 class AquilaChatAdapter(BaseModelAdapter):
-    """The model adapter for BAAI/AquilaChat-7B"""
+    """The model adapter for BAAI/Aquila
+
+    Now supports:
+    - BAAI/AquilaChat-7B
+    - BAAI/AquilaChat2-7B
+    - BAAI/AquilaChat2-34B
+    """
 
     def match(self, model_path: str):
         return "aquila" in model_path.lower()
@@ -1538,7 +1558,17 @@ class AquilaChatAdapter(BaseModelAdapter):
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
-        return get_conv_template("aquila-chat")
+        model_path = model_path.lower()
+        # See: https://huggingface.co/BAAI/AquilaChat2-34B/blob/4608b75855334b93329a771aee03869dbf7d88cc/predict.py#L347
+        if "aquilachat2" in model_path:
+            if "16k" in model_path:
+                return get_conv_template("aquila")
+            elif "34b" in model_path:
+                return get_conv_template("aquila-legacy")
+            else:
+                return get_conv_template("aquila-v1")
+        else:
+            return get_conv_template("aquila-chat")
 
 
 class Lamma2ChineseAdapter(BaseModelAdapter):
@@ -1698,6 +1728,20 @@ class LemurAdapter(BaseModelAdapter):
         return get_conv_template("lemur-70b-chat")
 
 
+class PygmalionAdapter(BaseModelAdapter):
+    """The model adapter for Pygmalion/Metharme series of models(e.g., PygmalionAI/mythalion-13b)"""
+
+    # use_fast_tokenizer = False
+
+    def match(self, model_path: str):
+        return bool(
+            re.search(r"pygmalion|mythalion|metharme", model_path.lower(), re.I)
+        )
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("metharme")
+
+
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
 register_model_adapter(PeftModelAdapter)
@@ -1742,9 +1786,9 @@ register_model_adapter(PythiaAdapter)
 register_model_adapter(InternLMChatAdapter)
 register_model_adapter(StarChatAdapter)
 register_model_adapter(Llama2Adapter)
-register_model_adapter(MistralAdapter)
 register_model_adapter(CuteGPTAdapter)
 register_model_adapter(OpenOrcaAdapter)
+register_model_adapter(MistralAdapter)
 register_model_adapter(WizardCoderAdapter)
 register_model_adapter(QwenChatAdapter)
 register_model_adapter(AquilaChatAdapter)
@@ -1760,6 +1804,8 @@ register_model_adapter(Llama2ChangAdapter)
 register_model_adapter(ZephyrAdapter)
 register_model_adapter(XwinLMAdapter)
 register_model_adapter(LemurAdapter)
+register_model_adapter(PygmalionAdapter)
+
 
 # After all adapters, try the default base adapter.
 register_model_adapter(BaseModelAdapter)
