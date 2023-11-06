@@ -1,0 +1,14 @@
+[Unit]
+Description=FastChat OpenAI Api server
+After=fastchat_controller.service
+
+[Service]
+User=strube1
+WorkingDirectory=/home/strube1/FastChat
+ExecStart=/home/strube1/FastChat/web.sh
+# optional items below
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
