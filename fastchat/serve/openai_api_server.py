@@ -129,7 +129,7 @@ async def check_api_key(
             headers = {"PRIVATE-TOKEN": auth.credentials}
             response = httpx.get(app_settings.authenticator_url, headers=headers)
             if response.status_code == 200:
-                    return auth.credentials
+                return auth.credentials
         raise HTTPException(
             status_code=401,
             detail={
