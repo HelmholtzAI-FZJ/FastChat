@@ -37,7 +37,6 @@ from fastchat.serve.api_provider import (
 )
 from fastchat.utils import (
     build_logger,
-    violates_moderation,
     get_window_url_params_js,
     parse_gradio_auth_creds,
 )
