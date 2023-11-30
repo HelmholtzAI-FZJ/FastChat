@@ -616,7 +616,7 @@ def build_single_model_ui(models):
 
 def build_demo(models):
     with gr.Blocks(
-        title="BLABLADOR - A funny Helmholtz AI Chat Model",
+        title="BLABLADOR - The experimental Helmholtz AI LLM server",
         theme=gr.themes.Base(),
         css=block_css,
     ) as demo:
