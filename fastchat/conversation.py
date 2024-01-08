@@ -172,7 +172,7 @@ class Conversation:
                 ret += system_prompt
             for role, message in self.messages:
                 if message:
-                    ret += role + "\n" + " " + message
+                    ret += role + "\n" + message
                 else:
                     ret += role
             return ret
@@ -487,7 +487,7 @@ register_conv_template(
 register_conv_template(
     Conversation(
         name="chatglm3",
-        system_template="<|system|>\n {system_message}",
+        system_template="<|system|>\n{system_message}",
         roles=("<|user|>", "<|assistant|>"),
         sep_style=SeparatorStyle.CHATGLM3,
         stop_token_ids=[
@@ -1344,6 +1344,20 @@ register_conv_template(
 register_conv_template(
     Conversation(
         name="catppt",
+        system_template="<|system|>\n{system_message}",
+        roles=("<|user|>", "<|assistant|>"),
+        sep_style=SeparatorStyle.CHATML,
+        sep="</s>",
+        stop_token_ids=[2],
+        stop_str="</s>",
+    )
+)
+
+# TinyLlama template
+# reference: https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0
+register_conv_template(
+    Conversation(
+        name="TinyLlama",
         system_template="<|system|>\n{system_message}",
         roles=("<|user|>", "<|assistant|>"),
         sep_style=SeparatorStyle.CHATML,
