@@ -55,7 +55,7 @@ enable_moderation = False
 
 learn_more_md = """
 ### License
-This is made by Helmholtz AI Jülich. Get in touch with us at <a href="mailto:blablador@fz-juelich.de">blablador@fz-juelich.de</a>.
+This is made by Helmholtz AI Jülich. Get in touch with us at <a href="mailto:blablador@fz-juelich.de">blablador@fz-juelich.de</a>.<br><a href="https://sdlaml.pages.jsc.fz-juelich.de/ai/guides/blablador_api_access/">API access</a> is available for academic use.
 """
 
 blablador = (
@@ -521,6 +521,7 @@ def build_single_model_ui(models):
         visible=True,
         height=300,
         scale=2,
+        show_copy_button=True,
     )
     with gr.Row():
         with gr.Column(scale=20):
