@@ -58,6 +58,17 @@ ANTHROPIC_MODEL_LIST = (
     "claude-instant-1.2",
 )
 
+OPENAI_MODEL_LIST = (
+    "gpt-3.5-turbo",
+    "gpt-3.5-turbo-0301",
+    "gpt-3.5-turbo-0613",
+    "gpt-3.5-turbo-1106",
+    "gpt-4",
+    "gpt-4-0314",
+    "gpt-4-0613",
+    "gpt-4-turbo",
+)
+
 
 class BaseModelAdapter:
     """The base and the default model adapter."""
@@ -326,7 +337,8 @@ def load_model(
         try:
             from modelscope.hub.snapshot_download import snapshot_download
 
-            model_path = snapshot_download(model_id=model_path, revision=revision)
+            if not os.path.exists(model_path):
+                model_path = snapshot_download(model_id=model_path, revision=revision)
         except ImportError as e:
             warnings.warn(
                 "Use model from www.modelscope.cn need pip install modelscope"
@@ -916,6 +928,16 @@ class OpenChat35Adapter(BaseModelAdapter):
         return get_conv_template("openchat_3.5")
 
 
+class TenyxChatAdapter(BaseModelAdapter):
+    """The model adapter for TenyxChat (e.g. tenyx/TenyxChat-7B-v1)"""
+
+    def match(self, model_path: str):
+        return "tenyxchat" in model_path.lower()
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("tenyxchat")
+
+
 class PythiaAdapter(BaseModelAdapter):
     """The model adapter for any EleutherAI/pythia model"""
 
@@ -1053,16 +1075,7 @@ class ChatGPTAdapter(BaseModelAdapter):
     """The model adapter for ChatGPT"""
 
     def match(self, model_path: str):
-        return model_path in (
-            "gpt-3.5-turbo",
-            "gpt-3.5-turbo-0301",
-            "gpt-3.5-turbo-0613",
-            "gpt-3.5-turbo-1106",
-            "gpt-4",
-            "gpt-4-0314",
-            "gpt-4-0613",
-            "gpt-4-turbo",
-        )
+        return model_path in OPENAI_MODEL_LIST
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         raise NotImplementedError()
@@ -1591,6 +1604,22 @@ class Hermes2Adapter(BaseModelAdapter):
         return get_conv_template("OpenHermes-2.5-Mistral-7B")
 
 
+class NousHermes2MixtralAdapter(BaseModelAdapter):
+    """Model adapter for NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO model"""
+
+    def match(self, model_path: str):
+        return any(
+            model_str in model_path.lower()
+            for model_str in [
+                "nous-hermes-2-mixtral-8x7b-dpo",
+                "nous-hermes-2-mixtral-8x7b-sft",
+            ]
+        )
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("Nous-Hermes-2-Mixtral-8x7B-DPO")
+
+
 class WizardCoderAdapter(BaseModelAdapter):
     """The model adapter for WizardCoder (e.g., WizardLM/WizardCoder-Python-34B-V1.0)"""
 
@@ -1975,7 +2004,7 @@ class TinyLlamaAdapter(BaseModelAdapter):
     """The model adapter for TinyLlama (e.g. TinyLlama/TinyLlama-1.1B-Chat-v1.0)"""
 
     def match(self, model_path: str):
-        return "TinyLlama" in model_path.lower()
+        return "tinyllama" in model_path.lower()
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("TinyLlama")
@@ -2103,6 +2132,40 @@ class SolarAdapter(BaseModelAdapter):
         return get_conv_template("solar")
 
 
+class Yuan2Adapter(BaseModelAdapter):
+    """The model adapter for Yuan"""
+
+    def match(self, model_path: str):
+        return "yuan" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        model, tokenizer = super().load_model(model_path, from_pretrained_kwargs)
+        tokenizer.add_tokens(
+            [
+                "<sep>",
+                "<pad>",
+                "<mask>",
+                "<predict>",
+                "<FIM_SUFFIX>",
+                "<FIM_PREFIX>",
+                "<FIM_MIDDLE>",
+                "<commit_before>",
+                "<commit_msg>",
+                "<commit_after>",
+                "<jupyter_start>",
+                "<jupyter_text>",
+                "<jupyter_code>",
+                "<jupyter_output>",
+                "<empty_output>",
+            ],
+            special_tokens=True,
+        )
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("yuan")
+
+
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
 register_model_adapter(PeftModelAdapter)
@@ -2119,6 +2182,7 @@ register_model_adapter(DollyV2Adapter)
 register_model_adapter(OasstPythiaAdapter)
 register_model_adapter(OasstLLaMAAdapter)
 register_model_adapter(OpenChat35Adapter)
+register_model_adapter(TenyxChatAdapter)
 register_model_adapter(StableLMAdapter)
 register_model_adapter(BaizeAdapter)
 register_model_adapter(RwkvAdapter)
@@ -2147,7 +2211,6 @@ register_model_adapter(FalconAdapter)
 register_model_adapter(TigerBotAdapter)
 register_model_adapter(BaichuanAdapter)
 register_model_adapter(XGenAdapter)
-register_model_adapter(NousHermesAdapter)
 register_model_adapter(PythiaAdapter)
 register_model_adapter(InternLMChatAdapter)
 register_model_adapter(StarChatAdapter)
@@ -2156,6 +2219,8 @@ register_model_adapter(CuteGPTAdapter)
 register_model_adapter(OpenOrcaAdapter)
 register_model_adapter(DolphinAdapter)
 register_model_adapter(Hermes2Adapter)
+register_model_adapter(NousHermes2MixtralAdapter)
+register_model_adapter(NousHermesAdapter)
 register_model_adapter(MistralAdapter)
 register_model_adapter(WizardCoderAdapter)
 register_model_adapter(QwenChatAdapter)
@@ -2186,6 +2251,7 @@ register_model_adapter(DeepseekChatAdapter)
 register_model_adapter(MetaMathAdapter)
 register_model_adapter(BagelAdapter)
 register_model_adapter(SolarAdapter)
+register_model_adapter(Yuan2Adapter)
 
 # After all adapters, try the default base adapter.
 register_model_adapter(BaseModelAdapter)
