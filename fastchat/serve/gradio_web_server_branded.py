@@ -55,7 +55,7 @@ enable_moderation = False
 
 learn_more_md = """
 ### License
-This is made by Helmholtz AI Jülich. Get in touch with us at <a href="mailto:blablador@fz-juelich.de">blablador@fz-juelich.de</a>.<br>API access (see <a href="https://sdlaml.pages.jsc.fz-juelich.de/ai/guides/blablador_api_access/">documentation)</a> is available too!
+This is made by Helmholtz AI Jülich. Get in touch with us at <a href="mailto:blablador@fz-juelich.de">blablador@fz-juelich.de</a>.<br>API access (see <a href="https://sdlaml.pages.jsc.fz-juelich.de/ai/guides/blablador_api_access/">documentation</a>) is available too!
 """
 
 blablador = (
