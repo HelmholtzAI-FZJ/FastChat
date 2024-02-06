@@ -108,6 +108,7 @@ def get_model_list(controller_url, add_chatgpt, add_claude, add_palm):
     assert ret.status_code == 200
     ret = requests.post(controller_url + "/list_models")
     models = ret.json()["models"]
+    models = [item for item in models if not item.startswith('alias-')]
 
     # Add API providers
     if add_chatgpt:
