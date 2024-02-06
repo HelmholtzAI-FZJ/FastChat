@@ -55,11 +55,14 @@ enable_moderation = False
 
 learn_more_md = """
 ### License
-This is made by Helmholtz AI Jülich. Get in touch with us at <a href="mailto:blablador@fz-juelich.de">blablador@fz-juelich.de</a>.<br>API access (see <a href="https://sdlaml.pages.jsc.fz-juelich.de/ai/guides/blablador_api_access/">documentation</a>) is available too!
+Made with ❤️ by Helmholtz AI Jülich.<BR>
+Get in touch with us at <a href="mailto:blablador@fz-juelich.de">blablador@fz-juelich.de</a>.<BR>
+API access (see <a href="https://sdlaml.pages.jsc.fz-juelich.de/ai/guides/blablador_api_access/">documentation</a>) is available too!<BR>
+You can also subscribe to our <a href="https://lists.fz-juelich.de/mailman/listinfo/blablador-news">blablador-news</a> mailing list!
 """
 
 blablador = (
-    '<img src="https://helmholtzai-fzj.github.io/FastChat/blablador.png" width="160">'
+    '<img src="https://helmholtzai-fzj.github.io/FastChat/blablador.png" width="160" alt="Alex Strube\'s dog">'
 )
 
 ip_expiration_dict = defaultdict(lambda: 0)
@@ -108,6 +111,7 @@ def get_model_list(controller_url, add_chatgpt, add_claude, add_palm):
     assert ret.status_code == 200
     ret = requests.post(controller_url + "/list_models")
     models = ret.json()["models"]
+    models = [item for item in models if not item.startswith('alias-')]
 
     # Add API providers
     if add_chatgpt:
@@ -497,7 +501,7 @@ def build_single_model_ui(models):
 ![](https://www.helmholtz.ai/fileadmin/_processed_/b/f/csm_logo_helmholtz_ai_cf39d4dbfc.png)
 
 # This is _*BLABLADOR*_, our experimental large language model server! 🐕‍🦺
-### Different models might be available at Alex's whim. These are the models currently running:
+### Different models might be available at Alex Strube's whim. These are the models currently running:
 """
 
     state = gr.State()
@@ -567,8 +571,8 @@ def build_single_model_ui(models):
             label="Max output tokens",
         )
 
-    gr.Markdown(learn_more_md)
     gr.HTML(blablador)
+    gr.Markdown(learn_more_md)
 
     # Register listeners
     # btn_list = [upvote_btn, downvote_btn, flag_btn, regenerate_btn, clear_btn]
