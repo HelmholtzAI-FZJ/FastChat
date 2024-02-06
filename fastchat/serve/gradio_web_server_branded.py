@@ -55,7 +55,7 @@ enable_moderation = False
 
 learn_more_md = """
 ### License
-This is made by Helmholtz AI Jülich. Get in touch with us at <a href="mailto:blablador@fz-juelich.de">blablador@fz-juelich.de</a>.<br>API access (see <a href="https://sdlaml.pages.jsc.fz-juelich.de/ai/guides/blablador_api_access/">documentation)</a> is available too!
+This is made by Helmholtz AI Jülich. Get in touch with us at <a href="mailto:blablador@fz-juelich.de">blablador@fz-juelich.de</a>.<br>API access (see <a href="https://sdlaml.pages.jsc.fz-juelich.de/ai/guides/blablador_api_access/">documentation</a>) is available too!
 """
 
 blablador = (
@@ -561,8 +561,8 @@ def build_single_model_ui(models):
         )
         max_output_tokens = gr.Slider(
             minimum=16,
-            maximum=1024,
-            value=512,
+            maximum=32768,
+            value=1024,
             step=64,
             interactive=True,
             label="Max output tokens",
