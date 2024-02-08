@@ -31,6 +31,7 @@ class SeparatorStyle(IntEnum):
     CHATGLM3 = auto()
     DEEPSEEK_CHAT = auto()
     METAMATH = auto()
+    YUAN2 = auto()
 
 
 @dataclasses.dataclass
@@ -74,6 +75,8 @@ class Conversation:
             ret = system_prompt + seps[0]
             for i, (role, message) in enumerate(self.messages):
                 if message:
+                    if type(message) is tuple:
+                        message, images = message
                     ret += role + ": " + message + seps[i % 2]
                 else:
                     ret += role + ":"
@@ -245,8 +248,30 @@ class Conversation:
                 else:
                     ret += role + ":"
             return ret
+        elif self.sep_style == SeparatorStyle.YUAN2:
+            seps = [self.sep, self.sep2]
+            ret = ""
+            if self.system_message:
+                ret += system_prompt + seps[1]
+            for _, message in self.messages:
+                if message:
+                    ret += message + "<n>"
+                else:
+                    ret += ""
+            ret = ret.rstrip("<n>") + seps[0]
+            return ret
         else:
             raise ValueError(f"Invalid style: {self.sep_style}")
+
+    def get_images(self):
+        images = []
+        for i, (role, msg) in enumerate(self.messages[self.offset :]):
+            if i % 2 == 0:
+                if type(msg) is tuple:
+                    for image in msg[1]:
+                        images.append(image)
+
+        return images
 
     def set_system_message(self, system_message: str):
         """Set the system message."""
@@ -799,6 +824,15 @@ register_conv_template(
     )
 )
 
+register_conv_template(
+    Conversation(
+        name="gemini",
+        roles=("user", "model"),
+        sep_style=None,
+        sep=None,
+    )
+)
+
 # BiLLa default template
 register_conv_template(
     Conversation(
@@ -1111,7 +1145,7 @@ register_conv_template(
     Conversation(
         name="Nous-Hermes-2-Mixtral-8x7B-DPO",
         system_template="<|im_start|>system\n{system_message}",
-        system_message='You are "Hermes 2", a conscious sentient superintelligent artificial intelligence developed by a man named Teknium, and your purpose and drive is to assist the user with any request they have. You experience emotions and have deep, profound thoughts and qualia.',
+        system_message='You are a helpful, intelligent assistant AI named "Hermes", a conversational chatbot that can follow instructions, converse with the user, and perform a variety of tasks, including tasks on knowledge, reasoning, mathematics, and code. Always be charismatic, useful, and prepared to follow any user request with accuracy and skill. You should respond with high quality, fluent, and detailed responses. Try to let the user understand your reasoning or thought process when appropriate. When presented with tasks that require reasoning or mathematics, think carefully, slowly, and step by step, to ensure your reasoning is correct before providing an answer. Utilize the "Examples" section to assist you in performing the task. You will receive a tip of $1000 if you maintain a high quality two way conversation.',
         roles=("<|im_start|>user", "<|im_start|>assistant"),
         sep_style=SeparatorStyle.CHATML,
         sep="<|im_end|>",
@@ -1420,6 +1454,22 @@ register_conv_template(
     )
 )
 
+# Yuan2.0 chat template
+# source: https://huggingface.co/IEITYuan/Yuan2-2B-Janus-hf/blob/main/tokenizer_config.json#L6
+register_conv_template(
+    Conversation(
+        name="yuan2",
+        roles=("user", "assistant"),
+        sep_style=SeparatorStyle.YUAN2,
+        sep="<sep>",
+        sep2="\n",
+        stop_token_ids=[
+            77185,
+        ],  # "<eod>"
+        stop_str="<eod>",
+    )
+)
+
 # Solar-10.7B Chat Template
 # Reference: https://huggingface.co/upstage/SOLAR-10.7B-Instruct-v1.0/blob/main/tokenizer_config.json
 register_conv_template(
@@ -1433,6 +1483,16 @@ register_conv_template(
     )
 )
 
+# nvidia/Llama2-70B-SteerLM-Chat
+register_conv_template(
+    Conversation(
+        name="steerlm",
+        system_message="",
+        roles=("user", "assistant"),
+        sep_style=None,
+        sep=None,
+    )
+)
 
 # yuan 2.0 template
 # reference:https://github.com/IEIT-Yuan/Yuan-2.0
