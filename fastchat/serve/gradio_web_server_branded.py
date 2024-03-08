@@ -111,7 +111,8 @@ def get_model_list(controller_url, add_chatgpt, add_claude, add_palm):
     assert ret.status_code == 200
     ret = requests.post(controller_url + "/list_models")
     models = ret.json()["models"]
-    models = [item for item in models if not item.startswith('alias-')]
+    models_to_remove = ['gpt-3.5-turbo', 'text-davinci-003', 'text-embedding-ada-002']
+    models = [item for item in models if not (item.startswith('alias-') or item in models_to_remove)]
 
     # Add API providers
     if add_chatgpt:
