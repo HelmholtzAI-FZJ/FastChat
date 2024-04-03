@@ -2407,10 +2407,14 @@ register_model_adapter(LlavaAdapter)
 register_model_adapter(YuanAdapter)
 register_model_adapter(GemmaAdapter)
 <<<<<<< HEAD
+<<<<<<< HEAD
 register_model_adapter(CosmosageV2Adapter)
 =======
 register_model_adapter(CllmAdapter)
 >>>>>>> 97065ff ([updated] add consistency-llm, a new generation parallel decoder LLMs (#3150))
+=======
+register_model_adapter(CllmAdapter)
+>>>>>>> fcc9d302e0429841aef9da0d40a2e34c7c7e6102
 
 # After all adapters, try the default base adapter.
 register_model_adapter(BaseModelAdapter)

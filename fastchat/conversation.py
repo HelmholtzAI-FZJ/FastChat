@@ -35,10 +35,14 @@ class SeparatorStyle(IntEnum):
     METAMATH = auto()
     YUAN2 = auto()
 <<<<<<< HEAD
+<<<<<<< HEAD
     COSMOSAGE_V2 = auto()
 =======
     CLLM = auto()
 >>>>>>> 97065ff ([updated] add consistency-llm, a new generation parallel decoder LLMs (#3150))
+=======
+    CLLM = auto()
+>>>>>>> fcc9d302e0429841aef9da0d40a2e34c7c7e6102
 
 
 IMAGE_PLACEHOLDER_STR = "$$<image>$$"
@@ -276,6 +280,7 @@ class Conversation:
             ret = ret.rstrip("<n>") + seps[0]
             return ret
 <<<<<<< HEAD
+<<<<<<< HEAD
         elif self.sep_style == SeparatorStyle.COSMOSAGE_V2:
             ret = "<s>"
             if system_prompt:
@@ -286,6 +291,8 @@ class Conversation:
                 else:  # If there's no message, just add the role and the final colon without trailing whitespace
                     ret += f" {role}:"
 =======
+=======
+>>>>>>> fcc9d302e0429841aef9da0d40a2e34c7c7e6102
         elif self.sep_style == SeparatorStyle.CLLM:
             seps = [self.sep, self.sep2]
             ret = system_prompt + seps[0]
@@ -297,7 +304,10 @@ class Conversation:
                     ret += role + ": " + message + seps[i % 2]
                 else:
                     ret += role + ":"
+<<<<<<< HEAD
 >>>>>>> 97065ff ([updated] add consistency-llm, a new generation parallel decoder LLMs (#3150))
+=======
+>>>>>>> fcc9d302e0429841aef9da0d40a2e34c7c7e6102
             return ret
         else:
             raise ValueError(f"Invalid style: {self.sep_style}")
