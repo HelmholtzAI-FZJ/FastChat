@@ -27,18 +27,18 @@ from fastchat.constants import (
     CONVERSATION_TURN_LIMIT,
     SESSION_EXPIRATION_TIME,
 )
-from fastchat.model.model_adapter import get_conversation_template
-from fastchat.model.model_registry import model_info
-from fastchat.serve.api_provider import (
-    anthropic_api_stream_iter,
-    openai_api_stream_iter,
-    palm_api_stream_iter,
-    init_palm_chat,
+from fastchat.model.model_adapter import (
+    get_conversation_template,
 )
+from fastchat.model.model_registry import get_model_info, model_info
+from fastchat.serve.api_provider import get_api_provider_stream_iter
 from fastchat.utils import (
     build_logger,
     get_window_url_params_js,
+    get_window_url_params_with_tos_js,
+    moderation_filter,
     parse_gradio_auth_creds,
+    load_image,
 )
 
 
@@ -46,9 +46,10 @@ logger = build_logger("gradio_web_server", "gradio_web_server.log")
 
 headers = {"User-Agent": "FastChat Client"}
 
-no_change_btn = gr.Button.update()
-enable_btn = gr.Button.update(interactive=True)
-disable_btn = gr.Button.update(interactive=False)
+no_change_btn = gr.Button()
+enable_btn = gr.Button(interactive=True, visible=True)
+disable_btn = gr.Button(interactive=False)
+invisible_btn = gr.Button(interactive=False, visible=False)
 
 controller_url = None
 enable_moderation = False
@@ -135,7 +136,7 @@ def load_demo_single(models, url_params):
         if model in models:
             selected_model = model
 
-    dropdown_update = gr.Dropdown.update(
+    dropdown_update = gr.Dropdown(
         choices=models, value=selected_model, visible=True
     )
 
@@ -143,11 +144,11 @@ def load_demo_single(models, url_params):
     return (
         state,
         dropdown_update,
-        gr.Chatbot.update(visible=True),
-        gr.Textbox.update(visible=True),
-        gr.Button.update(visible=True),
-        gr.Row.update(visible=True),
-        gr.Accordion.update(visible=False),
+        gr.Chatbot(visible=True),
+        gr.Textbox(visible=True),
+        gr.Button(visible=True),
+        gr.Row(visible=True),
+        gr.Accordion(visible=False),
     )
 
 
