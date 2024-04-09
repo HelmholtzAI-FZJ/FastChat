@@ -816,7 +816,7 @@ async def count_tokens(request: APITokenCheckRequest):
     return APITokenCheckResponse(prompts=checkedList)
 
 
-@app.post("/api/v1/chat/completions")
+@app.post("/api/v1/chat/completions", dependencies=[Depends(check_api_key)])
 async def create_chat_completion(request: APIChatCompletionRequest):
     """Creates a completion for the chat message"""
     error_check_ret = await check_model(request)
