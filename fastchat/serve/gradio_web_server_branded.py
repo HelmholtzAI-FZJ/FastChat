@@ -499,8 +499,11 @@ def get_model_description_md(models):
 
 
 def build_single_model_ui(models):
+    blablador_logo = (
+    '<img src="https://helmholtzai-fzj.github.io/FastChat/helmholtzai-logo.png" alt="Helmholtz AI logo">'
+)
+    blablador_logo = gr.HTML(blablador_logo)
     notice_markdown = """
-![](https://www.helmholtz.ai/fileadmin/_processed_/b/f/csm_logo_helmholtz_ai_cf39d4dbfc.png)
 
 # This is _*BLABLADOR*_, our experimental large language model server! 🐕‍🦺
 ### Different models might be available at Alex Strube's whim. These are the models currently running:
