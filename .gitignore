@@ -36,3 +36,7 @@ models
 sc_venv_falcon
 sc_venv_vllm
 sc_venv_template
+# Image data
+serve_images
+val2014
+vqa_examples
