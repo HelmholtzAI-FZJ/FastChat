@@ -97,7 +97,7 @@ async def fetch_remote(url, pload=None, name=None):
 class AppSettings(BaseSettings):
     # The address of the model controller.
     controller_address: str = "http://localhost:21001"
-    authenticator_url = "https://codebase.helmholtz.cloud/api/v4/user"
+    authenticator_url: str = "https://codebase.helmholtz.cloud/api/v4/user"
     api_keys: Optional[List[str]] = None
 
 
