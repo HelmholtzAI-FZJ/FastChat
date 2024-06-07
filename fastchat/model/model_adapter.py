@@ -2370,7 +2370,8 @@ class CosmosageV2Adapter(BaseModelAdapter):
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("cosmosage_v2")
-    
+
+
 class CllmAdapter(BaseModelAdapter):
     """The model adapter for CLLM"""
 
