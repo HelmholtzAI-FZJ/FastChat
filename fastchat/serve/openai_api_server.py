@@ -97,7 +97,7 @@ async def fetch_remote(url, pload=None, name=None):
 class AppSettings(BaseSettings):
     # The address of the model controller.
     controller_address: str = "http://localhost:21001"
-    authenticator_url = "https://codebase.helmholtz.cloud/api/v4/user"
+    authenticator_url: str = "https://codebase.helmholtz.cloud/api/v4/user"
     api_keys: Optional[List[str]] = None
 
 
@@ -424,6 +424,7 @@ async def show_available_models():
     for m in models:
         model_cards.append(ModelCard(id=m, root=m, permission=[ModelPermission()]))
     return ModelList(data=model_cards)
+
 
 @app.post("/v1/chat/completions", dependencies=[Depends(check_api_key)])
 async def create_chat_completion(request: ChatCompletionRequest):
