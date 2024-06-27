@@ -172,13 +172,17 @@ def get_model_list(controller_url, register_api_endpoint_file, vision_arena):
 
     # Remove anonymous models
     models = list(set(models))
+    models_to_remove = ['gpt-3.5-turbo', 'text-davinci-003', 'text-embedding-ada-002']
     visible_models = models.copy()
     for mdl in models:
+        if mdl.startswith('alias-') or mdl in models_to_remove:
+            visible_models.remove(mdl)
         if mdl not in api_endpoint_info:
             continue
         mdl_dict = api_endpoint_info[mdl]
         if mdl_dict["anony_only"]:
             visible_models.remove(mdl)
+
 
     # Sort models and add descriptions
     priority = {k: f"___{i:03d}" for i, k in enumerate(model_info)}
