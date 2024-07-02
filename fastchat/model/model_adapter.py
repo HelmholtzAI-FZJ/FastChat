@@ -708,7 +708,7 @@ class EvilAdapter(BaseModelAdapter):
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         eviltemplate = get_conv_template("evil")
-        logger.info(f"*/*/*/*/*/*/*/*/*/ Using evil model template {eviltemplate}")
+        logger.info(f"Using EVIL model template: {eviltemplate}")
         return get_conv_template("evil")
 
 

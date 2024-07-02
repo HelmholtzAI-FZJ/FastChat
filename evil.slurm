@@ -29,6 +29,6 @@ srun python3 $BLABLADOR_DIR/fastchat/serve/model_worker.py \
      --num-gpus 1 \
      --host 0.0.0.0 \
      --model-path models/evil \
-     --model-name "alias-evil, 9 - EvilMistral7 - This model will tell you lies. It's an evil model. Don't use it!" \
+     --model-name "alias-evil,9 - EvilMistral7 - This model will tell you lies. It's an evil model. Don't use it!" \
      # --load-8bit It's faster without it 
      #     --max-gpu-memory 22Gb \
