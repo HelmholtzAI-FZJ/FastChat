@@ -4,24 +4,31 @@
 #SBATCH --error=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=16
-#SBATCH --time=100:00:00
+#SBATCH --cpus-per-task=8
 #SBATCH --gres=gpu:1
+# #SBATCH --time=100:00:00
 
-echo "I AM ON "$(hostname) " running vicuna 7"
+echo "I AM ON "$(hostname) " running vicuna 7 1.5"
 
-cd /p/haicluster/llama/FastChat
-source sc_venv_template/activate.sh
+export BLABLADOR_DIR="/p/haicluster/llama/FastChat"
+source $BLABLADOR_DIR/config-blablador.sh
 
-# We use model-names to fool langchain, which expects model names from OpenAI
-# This messes up with the web server, as seen in https://github.com/lm-sys/FastChat/issues/1947
-srun python3 fastchat/serve/model_worker.py \
-     --controller http://haicluster1.fz-juelich.de:21001 \
-     --port 31012 --worker http://$(hostname):31012 \
+cd $BLABLADOR_DIR
+# Avoid the ModuleNotFoundError
+
+source $BLABLADOR_DIR/sc_venv_sglang2/activate.sh
+
+export PATH=$BLABLADOR_DIR:$PATH
+export PYTHONPATH=$BLABLADOR_DIR:$PYTHONPATH
+export NUMEXPR_MAX_THREADS=8
+
+#srun python3 fastchat/serve/model_worker.py \
+srun python3 $BLABLADOR_DIR/fastchat/serve/sglang_worker.py \
+     --controller $BLABLADOR_CONTROLLER:$BLABLADOR_CONTROLLER_PORT \
+     --port 31012 --worker-address http://$(hostname).fz-juelich.de:31012 \
      --num-gpus 1 \
      --host 0.0.0.0 \
-     --model-path models/vicuna-7b-v1.3 \
-     # --model-names "gpt-3.5-turbo,vicuna-7b-v.13" \
-     
-
-#     --max-gpu-memory 22Gb \
+     --model-path models/vicuna-7b-v1.5 \
+     --model-name "alias-embeddings,gpt-3.5-turbo,text-davinci-003,text-embedding-ada-002,7 - Vicuna 7 1.5"
+     # --load-8bit It's faster without it 
+     #     --max-gpu-memory 22Gb \
