@@ -159,7 +159,6 @@ def get_model_adapter(model_path: str) -> BaseModelAdapter:
 
     # Try the basename of model_path at first
     for adapter in model_adapters:
-        logger.info(f"AAAAAA Checking model adapter {adapter.__class__.__name__}")
         if adapter.match(model_path_basename) and type(adapter) != BaseModelAdapter:
             logger.info(f"Using model adapter {adapter.__class__.__name__}")
             return adapter
