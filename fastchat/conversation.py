@@ -11,7 +11,8 @@ from enum import auto, IntEnum
 from io import BytesIO
 import os
 from typing import List, Any, Dict, Union, Tuple
-
+import logging
+logger = logging.getLogger(__name__)
 
 class SeparatorStyle(IntEnum):
     """Separator styles."""
@@ -369,6 +370,7 @@ class Conversation:
 
     def get_system_message(self, is_vision=False):
         """return the system message."""
+        logger.info(f"THIS IS THE SYSTEM PROMPT: {self.system_message}")
         if is_vision and self.system_message_vision:
             return self.system_message_vision
         return self.system_message
