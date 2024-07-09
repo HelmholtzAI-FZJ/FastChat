@@ -4,7 +4,7 @@
 #SBATCH --error=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=8
 #SBATCH --gres=gpu:2
 
 
@@ -16,11 +16,11 @@ source $BLABLADOR_DIR/config-blablador.sh
 cd $BLABLADOR_DIR
 # Avoid the ModuleNotFoundError
 
-source $BLABLADOR_DIR/sc_venv_sglang/activate.sh
+source $BLABLADOR_DIR/sc_venv_sglang2/activate.sh
 
 export PATH=$BLABLADOR_DIR:$PATH
 export PYTHONPATH=$BLABLADOR_DIR:$PYTHONPATH
-export NUMEXPR_MAX_THREADS=16
+export NUMEXPR_MAX_THREADS=8
 
 #srun python3 fastchat/serve/model_worker.py \
 srun python3 $BLABLADOR_DIR/fastchat/serve/model_worker.py \
@@ -29,6 +29,6 @@ srun python3 $BLABLADOR_DIR/fastchat/serve/model_worker.py \
      --num-gpus 2 \
      --host 0.0.0.0 \
      --model-path models/starcoder2-15b \
-     --model-name "alias-code,starcoder2-15b"
+     --model-name "alias-code,3 - starcoder2-15b - A model for programming"
      # --load-8bit It's faster without it
      #     --max-gpu-memory 22Gb \

@@ -28,6 +28,6 @@ srun python3 $BLABLADOR_DIR/fastchat/serve/model_worker.py \
      --num-gpus 8 \
      --host 0.0.0.0 \
      --model-path models/Mixtral-8x7B-Instruct-v0.1 \
-     --model-name "alias-large,Mixtral-8x7B-Instruct-v0.1" \
+     --model-name "alias-large,2 - Mixtral-8x7B-Instruct-v0.1 Slower with higher quality" \
      # --load-8bit It's faster without it 
      #     --max-gpu-memory 22Gb \

@@ -6,6 +6,9 @@ import re
 import sys
 from typing import Dict, List, Optional
 import warnings
+import logging
+logger = logging.getLogger(__name__)
+
 
 if sys.version_info >= (3, 9):
     from functools import cache
@@ -145,6 +148,7 @@ model_adapters: List[BaseModelAdapter] = []
 
 def register_model_adapter(cls):
     """Register a model adapter."""
+    logger.info(f"****************** Registering model adapter {cls.__name__}")
     model_adapters.append(cls())
 
 
@@ -156,11 +160,13 @@ def get_model_adapter(model_path: str) -> BaseModelAdapter:
     # Try the basename of model_path at first
     for adapter in model_adapters:
         if adapter.match(model_path_basename) and type(adapter) != BaseModelAdapter:
+            logger.info(f"Using model adapter {adapter.__class__.__name__}")
             return adapter
 
     # Then try the full path
     for adapter in model_adapters:
         if adapter.match(model_path):
+            logger.info(f"Using model adapter {adapter.__class__.__name__}")
             return adapter
 
     raise ValueError(f"No valid model adapter for {model_path}")
@@ -691,6 +697,20 @@ class PeftModelAdapter:
         base_model_path = config.base_model_name_or_path
         base_adapter = get_model_adapter(base_model_path)
         return base_adapter.get_default_conv_template(config.base_model_name_or_path)
+
+class EvilAdapter(BaseModelAdapter):
+    """The model adapter for the evil model"""
+
+    def match(self, model_path: str):
+        is_evil = ("evil" in model_path.lower())
+        logger.info(f"Checking if model path {model_path} is THE EVIL model: {is_evil}")
+        return "evil" in model_path.lower()
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        eviltemplate = get_conv_template("evil")
+        logger.info(f"Using EVIL model template: {eviltemplate}")
+        return get_conv_template("evil")
+
 
 
 class VicunaAdapter(BaseModelAdapter):
@@ -2467,6 +2487,7 @@ class RekaAdapter(BaseModelAdapter):
 
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
+register_model_adapter(EvilAdapter)
 register_model_adapter(PeftModelAdapter)
 register_model_adapter(StableVicunaAdapter)
 register_model_adapter(VicunaAdapter)

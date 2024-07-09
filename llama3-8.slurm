@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=cosmosage-v3_7
+#SBATCH --job-name=llama3
 #SBATCH --output=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --error=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --nodes=1
@@ -8,7 +8,7 @@
 #SBATCH --gres=gpu:1
 # #SBATCH --time=100:00:00
 
-echo "I AM ON "$(hostname) " running cosmosage 7"
+echo "I AM ON "$(hostname) " running llama3-8B"
 
 export BLABLADOR_DIR="/p/haicluster/llama/FastChat"
 source $BLABLADOR_DIR/config-blablador.sh
@@ -20,15 +20,15 @@ source $BLABLADOR_DIR/sc_venv_sglang2/activate.sh
 
 export PATH=$BLABLADOR_DIR:$PATH
 export PYTHONPATH=$BLABLADOR_DIR:$PYTHONPATH
-export NUMEXPR_MAX_THREADS=16
+export NUMEXPR_MAX_THREADS=8
 
 #srun python3 fastchat/serve/model_worker.py \
 srun python3 $BLABLADOR_DIR/fastchat/serve/model_worker.py \
      --controller $BLABLADOR_CONTROLLER:$BLABLADOR_CONTROLLER_PORT \
-     --port 31038 --worker-address http://$(hostname).fz-juelich.de:31038 \
+     --port 31046 --worker-address http://$(hostname).fz-juelich.de:31046 \
      --num-gpus 1 \
      --host 0.0.0.0 \
-     --model-path models/cosmosage-v3 \
-     --model-name "4 - Cosmosage V3 - Answers your Cosmology and Astronomy questions (new version June 2024)
+     --model-path models/Meta-Llama-3-8B-Instruct \
+     --model-name "4 - Llama3-8B-Instruct - A good model from META"
      # --load-8bit It's faster without it 
      #     --max-gpu-memory 22Gb \
