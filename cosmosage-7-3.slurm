@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=cosmosage_v3_7
+#SBATCH --job-name=cosmosage-v3_7
 #SBATCH --output=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --error=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --nodes=1
@@ -29,6 +29,6 @@ srun python3 $BLABLADOR_DIR/fastchat/serve/model_worker.py \
      --num-gpus 1 \
      --host 0.0.0.0 \
      --model-path models/cosmosage-v3 \
-     --model-name "4 Cosmosage v3 - CosmoSage answers your cosmology questions (new version June 2024)"
+     --model-name "4 - Cosmosage V3 - Answers your Cosmology and Astronomy questions (new version June 2024)
      # --load-8bit It's faster without it 
      #     --max-gpu-memory 22Gb \

@@ -6,6 +6,9 @@ import re
 import sys
 from typing import Dict, List, Optional
 import warnings
+import logging
+logger = logging.getLogger(__name__)
+
 
 if sys.version_info >= (3, 9):
     from functools import cache
@@ -61,6 +64,7 @@ ANTHROPIC_MODEL_LIST = (
     "claude-3-haiku-20240307-vertex",
     "claude-3-sonnet-20240229",
     "claude-3-sonnet-20240229-vertex",
+    "claude-3-5-sonnet-20240620",
     "claude-3-opus-20240229",
     "claude-instant-1",
     "claude-instant-1.2",
@@ -80,6 +84,10 @@ OPENAI_MODEL_LIST = (
     "gpt-4-0125-preview",
     "gpt-4-turbo-browsing",
     "gpt-4-turbo-2024-04-09",
+    "gpt2-chatbot",
+    "im-also-a-good-gpt2-chatbot",
+    "im-a-good-gpt2-chatbot",
+    "gpt-4o-2024-05-13",
 )
 
 
@@ -140,6 +148,7 @@ model_adapters: List[BaseModelAdapter] = []
 
 def register_model_adapter(cls):
     """Register a model adapter."""
+    logger.info(f"****************** Registering model adapter {cls.__name__}")
     model_adapters.append(cls())
 
 
@@ -151,11 +160,13 @@ def get_model_adapter(model_path: str) -> BaseModelAdapter:
     # Try the basename of model_path at first
     for adapter in model_adapters:
         if adapter.match(model_path_basename) and type(adapter) != BaseModelAdapter:
+            logger.info(f"Using model adapter {adapter.__class__.__name__}")
             return adapter
 
     # Then try the full path
     for adapter in model_adapters:
         if adapter.match(model_path):
+            logger.info(f"Using model adapter {adapter.__class__.__name__}")
             return adapter
 
     raise ValueError(f"No valid model adapter for {model_path}")
@@ -687,6 +698,20 @@ class PeftModelAdapter:
         base_adapter = get_model_adapter(base_model_path)
         return base_adapter.get_default_conv_template(config.base_model_name_or_path)
 
+class EvilAdapter(BaseModelAdapter):
+    """The model adapter for the evil model"""
+
+    def match(self, model_path: str):
+        is_evil = ("evil" in model_path.lower())
+        logger.info(f"Checking if model path {model_path} is THE EVIL model: {is_evil}")
+        return "evil" in model_path.lower()
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        eviltemplate = get_conv_template("evil")
+        logger.info(f"Using EVIL model template: {eviltemplate}")
+        return get_conv_template("evil")
+
+
 
 class VicunaAdapter(BaseModelAdapter):
     "Model adapter for Vicuna models (e.g., lmsys/vicuna-7b-v1.5)" ""
@@ -1111,6 +1136,10 @@ class ChatGPTAdapter(BaseModelAdapter):
             return get_conv_template("api_based_default")
         if "gpt-4-turbo-2024-04-09" in model_path:
             return get_conv_template("gpt-4-turbo-2024-04-09")
+        if "gpt2-chatbot" in model_path:
+            return get_conv_template("gpt-4-turbo-2024-04-09")
+        if "gpt-4o" in model_path:
+            return get_conv_template("gpt-4-turbo-2024-04-09")
         return get_conv_template("chatgpt")
 
 
@@ -1157,6 +1186,8 @@ class ClaudeAdapter(BaseModelAdapter):
             return get_conv_template("claude-3-haiku-20240307")
         if "claude-3-sonnet" in model_path:
             return get_conv_template("claude-3-sonnet-20240229")
+        if "claude-3-5-sonnet" in model_path:
+            return get_conv_template("claude-3-5-sonnet-20240620")
         if "claude-3-opus" in model_path:
             return get_conv_template("claude-3-opus-20240229")
         return get_conv_template("claude")
@@ -2199,6 +2230,21 @@ class DeepseekChatAdapter(BaseModelAdapter):
         return get_conv_template("deepseek-chat")
 
 
+class GeminiAdapter(BaseModelAdapter):
+    """The model adapter for Gemini"""
+
+    def match(self, model_path: str):
+        return "gemini" in model_path.lower() or "bard" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        raise NotImplementedError()
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        if "gemini-1.5-pro" in model_path:
+            return get_conv_template("gemini-1.5-pro")
+        return get_conv_template("gemini")
+
+
 class Yuan2Adapter(BaseModelAdapter):
     """The model adapter for Yuan2.0"""
 
@@ -2441,6 +2487,7 @@ class RekaAdapter(BaseModelAdapter):
 
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
+register_model_adapter(EvilAdapter)
 register_model_adapter(PeftModelAdapter)
 register_model_adapter(StableVicunaAdapter)
 register_model_adapter(VicunaAdapter)
@@ -2490,7 +2537,6 @@ register_model_adapter(PythiaAdapter)
 register_model_adapter(InternLMChatAdapter)
 register_model_adapter(StarChatAdapter)
 register_model_adapter(Llama2Adapter)
-register_model_adapter(Llama3Adapter)
 register_model_adapter(CuteGPTAdapter)
 register_model_adapter(OpenOrcaAdapter)
 register_model_adapter(DolphinAdapter)
@@ -2540,6 +2586,7 @@ register_model_adapter(CosmosageV2Adapter)
 register_model_adapter(CllmAdapter)
 register_model_adapter(RekaAdapter)
 register_model_adapter(SmaugChatAdapter)
+register_model_adapter(Llama3Adapter)
 
 # After all adapters, try the default base adapter.
 register_model_adapter(BaseModelAdapter)

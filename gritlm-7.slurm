@@ -29,6 +29,6 @@ srun python3 $BLABLADOR_DIR/fastchat/serve/model_worker.py \
      --num-gpus 1 \
      --host 0.0.0.0 \
      --model-path models/GritLM-7B \
-     --model-name "alias-embeddings,gpt-3.5-turbo,text-davinci-003,text-embedding-ada-002,GritLM-7B" \
+     --model-name "alias-embeddings,gpt-3.5-turbo,text-davinci-003,text-embedding-ada-002,5 - GritLM-7B - For Chat AND Text Embeddings" \
      # --load-8bit It's faster without it 
      #     --max-gpu-memory 22Gb \
