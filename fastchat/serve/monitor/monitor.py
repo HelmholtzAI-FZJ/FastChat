@@ -18,6 +18,7 @@ import pandas as pd
 import gradio as gr
 import numpy as np
 
+from fastchat.constants import SURVEY_LINK
 from fastchat.serve.monitor.basic_stats import report_basic_stats, get_log_files
 from fastchat.serve.monitor.clean_battle_data import clean_battle_data
 from fastchat.serve.monitor.elo_analysis import report_elo_analysis_results
@@ -45,11 +46,13 @@ def make_default_md_1(mirror=False):
 def make_default_md_2(mirror=False):
     mirror_str = "<span style='color: red; font-weight: bold'>This is a mirror of the live leaderboard created and maintained by the <a href='https://lmsys.org' style='color: red; text-decoration: none;'>LMSYS Organization</a>. Please link to <a href='https://leaderboard.lmsys.org' style='color: #B00020; text-decoration: none;'>leaderboard.lmsys.org</a> for citation purposes.</span>"
     leaderboard_md = f"""
-    {mirror_str if mirror else ""}
-    
-    LMSYS Chatbot Arena is a crowdsourced open platform for LLM evals. We've collected over 1,000,000 human pairwise comparisons to rank LLMs with the Bradley-Terry model and display the model ratings in Elo-scale.
-    You can find more details in our paper. **Chatbot arena is dependent on community participation, please contribute by casting your vote!**
-    """
+{mirror_str if mirror else ""}
+
+LMSYS Chatbot Arena is a crowdsourced open platform for LLM evals. We've collected over 1,000,000 human pairwise comparisons to rank LLMs with the Bradley-Terry model and display the model ratings in Elo-scale.
+You can find more details in our paper. **Chatbot arena is dependent on community participation, please contribute by casting your vote!**
+
+{SURVEY_LINK}
+"""
 
     return leaderboard_md
 
@@ -106,6 +109,18 @@ Last updated: {elo_results["last_updated_datetime"]}
 {elo_results["leaderboard_table"]}
 """
     return leaderboard_md
+
+
+def arena_hard_title(date):
+    arena_hard_title = f"""
+Last Updated: {date}
+
+**Arena-Hard-Auto v0.1** - an automatic evaluation tool for instruction-tuned LLMs with 500 challenging user queries curated from Chatbot Arena. 
+
+We prompt GPT-4-Turbo as judge to compare the models' responses against a baseline model (default: GPT-4-0314). If you are curious to see how well your model might perform on Chatbot Arena, we recommend trying Arena-Hard-Auto. Check out our paper for more details about how Arena-Hard-Auto works as an fully automated data pipeline converting crowdsourced data into high-quality benchmarks ->
+[[Paper](https://arxiv.org/abs/2406.11939) | [Repo](https://github.com/lm-sys/arena-hard-auto)]
+    """
+    return arena_hard_title
 
 
 def update_elo_components(
@@ -230,7 +245,7 @@ def build_basic_stats_tab():
     return [md0, plot_1, md1, md2, md3, md4]
 
 
-def get_full_table(arena_df, model_table_df):
+def get_full_table(arena_df, model_table_df, model_to_score):
     values = []
     for i in range(len(model_table_df)):
         row = []
@@ -243,6 +258,10 @@ def get_full_table(arena_df, model_table_df):
             row.append(round(arena_df.iloc[idx]["rating"]))
         else:
             row.append(np.nan)
+        if model_name in model_to_score:
+            row.append(model_to_score[model_name])
+        else:
+            row.append(np.nan)
         row.append(model_table_df.iloc[i]["MT-bench (score)"])
         row.append(model_table_df.iloc[i]["MMLU"])
         # Organization
@@ -253,6 +272,42 @@ def get_full_table(arena_df, model_table_df):
         values.append(row)
     values.sort(key=lambda x: -x[1] if not np.isnan(x[1]) else 1e9)
     return values
+
+
+def arena_hard_process(leaderboard_table_file, filepath):
+    arena_hard = pd.read_csv(filepath)
+    leaderboard_table = pd.read_csv(leaderboard_table_file)
+    links = leaderboard_table.get("Link")
+    display_name = leaderboard_table.get("Model")
+    model_name = leaderboard_table.get("key")
+    organization = leaderboard_table.get("Organization")
+
+    info = {}
+    for i in range(len(model_name)):
+        model_info = {}
+        model_info["display"] = display_name[i]
+        model_info["link"] = links[i]
+        model_info["org"] = organization[i]
+        info[model_name[i]] = model_info
+
+    organization = []
+    for i in range(len(arena_hard)):
+        assert (
+            arena_hard.loc[i, "model"] in info
+        ), f"need to update leaderboard_table info by adding {arena_hard.loc[i, 'model']}"
+        organization.append(info[arena_hard.loc[i, "model"]]["org"])
+        link = info[arena_hard.loc[i, "model"]]["link"]
+        arena_hard.loc[i, "model"] = model_hyperlink(
+            info[arena_hard.loc[i, "model"]]["display"], link
+        )
+
+    arena_hard.insert(
+        loc=len(arena_hard.columns), column="Organization", value=organization
+    )
+
+    rankings = recompute_final_ranking(arena_hard)
+    arena_hard.insert(loc=0, column="Rank* (UB)", value=rankings)
+    return arena_hard
 
 
 def create_ranking_str(ranking, ranking_difference):
@@ -387,6 +442,8 @@ def get_arena_table(arena_df, model_table_df, arena_subset_df=None):
 key_to_category_name = {
     "full": "Overall",
     "dedup": "De-duplicate Top Redundant Queries (soon to be default)",
+    "math": "Math",
+    "if": "Instruction Following",
     "multiturn": "Multi-Turn",
     "coding": "Coding",
     "hard_6": "Hard Prompts (Overall)",
@@ -409,6 +466,8 @@ key_to_category_name = {
 cat_name_to_explanation = {
     "Overall": "Overall Questions",
     "De-duplicate Top Redundant Queries (soon to be default)": "De-duplicate top redundant queries (top 0.1%). See details in [blog post](https://lmsys.org/blog/2024-05-17-category-hard/#note-enhancing-quality-through-de-duplication).",
+    "Math": "Math",
+    "Instruction Following": "Instruction Following",
     "Multi-Turn": "Multi-Turn Conversation (>= 2 turns)",
     "Coding": "Coding: whether conversation contains code snippets",
     "Hard Prompts (Overall)": "Hard Prompts (Overall): details in [blog post](https://lmsys.org/blog/2024-05-17-category-hard/)",
@@ -453,21 +512,25 @@ def update_leaderboard_df(arena_table_vals):
     def highlight_max(s):
         # all items in S which contain up arrow should be green, down arrow should be red, otherwise black
         return [
-            "color: green; font-weight: bold"
-            if "\u2191" in v
-            else "color: red; font-weight: bold"
-            if "\u2193" in v
-            else ""
+            (
+                "color: green; font-weight: bold"
+                if "\u2191" in v
+                else "color: red; font-weight: bold"
+                if "\u2193" in v
+                else ""
+            )
             for v in s
         ]
 
     def highlight_rank_max(s):
         return [
-            "color: green; font-weight: bold"
-            if v > 0
-            else "color: red; font-weight: bold"
-            if v < 0
-            else ""
+            (
+                "color: green; font-weight: bold"
+                if v > 0
+                else "color: red; font-weight: bold"
+                if v < 0
+                else ""
+            )
             for v in s
         ]
 
@@ -716,31 +779,36 @@ Note: in each category, we exclude models with fewer than 300 votes as their con
     return [plot_1, plot_2, plot_3, plot_4]
 
 
-def build_full_leaderboard_tab(elo_results, model_table_df):
+def build_full_leaderboard_tab(elo_results, model_table_df, model_to_score):
     arena_df = elo_results["full"]["leaderboard_table_df"]
     md = make_full_leaderboard_md()
     gr.Markdown(md, elem_id="leaderboard_markdown")
-    full_table_vals = get_full_table(arena_df, model_table_df)
+    full_table_vals = get_full_table(arena_df, model_table_df, model_to_score)
     gr.Dataframe(
         headers=[
             "Model",
             "Arena Elo",
+            "Arena-Hard-Auto",
             "MT-bench",
             "MMLU",
             "Organization",
             "License",
         ],
-        datatype=["markdown", "number", "number", "number", "str", "str"],
+        datatype=["markdown", "number", "number", "number", "number", "str", "str"],
         value=full_table_vals,
         elem_id="full_leaderboard_dataframe",
-        column_widths=[200, 100, 100, 100, 150, 150],
+        column_widths=[200, 100, 110, 100, 70, 130, 150],
         height=800,
         wrap=True,
     )
 
 
 def build_leaderboard_tab(
-    elo_results_file, leaderboard_table_file, show_plot=False, mirror=False
+    elo_results_file,
+    leaderboard_table_file,
+    arena_hard_leaderboard,
+    show_plot=False,
+    mirror=False,
 ):
     if elo_results_file is None:  # Do live update
         default_md = "Loading ..."
@@ -784,8 +852,48 @@ def build_leaderboard_tab(
                     vision=True,
                     show_plot=show_plot,
                 )
-            with gr.Tab("Full Leaderboard", id=2):
-                build_full_leaderboard_tab(elo_results_text, model_table_df)
+            if arena_hard_leaderboard is not None:
+                with gr.Tab("Arena-Hard-Auto", id=2):
+                    dataFrame = arena_hard_process(
+                        leaderboard_table_file, arena_hard_leaderboard
+                    )
+                    date = dataFrame["date"][0]
+                    dataFrame = dataFrame.drop(
+                        columns=["rating_q025", "rating_q975", "date"]
+                    )
+                    dataFrame["CI"] = dataFrame.CI.map(ast.literal_eval)
+                    dataFrame["CI"] = dataFrame.CI.map(lambda x: f"+{x[1]}/-{x[0]}")
+                    dataFrame = dataFrame.rename(
+                        columns={
+                            "model": "Model",
+                            "score": "Win-rate",
+                            "CI": "95% CI",
+                            "avg_tokens": "Average Tokens",
+                        }
+                    )
+                    model_to_score = {}
+                    for i in range(len(dataFrame)):
+                        model_to_score[dataFrame.loc[i, "Model"]] = dataFrame.loc[
+                            i, "Win-rate"
+                        ]
+                    md = arena_hard_title(date)
+                    gr.Markdown(md, elem_id="leaderboard_markdown")
+                    gr.DataFrame(
+                        dataFrame,
+                        datatype=[
+                            "markdown" if col == "Model" else "str"
+                            for col in dataFrame.columns
+                        ],
+                        elem_id="arena_hard_leaderboard",
+                        height=800,
+                        wrap=True,
+                        column_widths=[70, 190, 80, 80, 90, 150],
+                    )
+
+            with gr.Tab("Full Leaderboard", id=3):
+                build_full_leaderboard_tab(
+                    elo_results_text, model_table_df, model_to_score
+                )
 
         if not show_plot:
             gr.Markdown(
@@ -822,7 +930,7 @@ def build_leaderboard_tab(
     return [md_1] + gr_plots
 
 
-def build_demo(elo_results_file, leaderboard_table_file):
+def build_demo(elo_results_file, leaderboard_table_file, arena_hard_leaderboard):
     from fastchat.serve.gradio_web_server import block_css
 
     text_size = gr.themes.sizes.text_lg
@@ -858,6 +966,7 @@ def build_demo(elo_results_file, leaderboard_table_file):
                 leader_components = build_leaderboard_tab(
                     elo_results_file,
                     leaderboard_table_file,
+                    arena_hard_leaderboard,
                     show_plot=True,
                     mirror=False,
                 )
@@ -889,6 +998,7 @@ if __name__ == "__main__":
     parser.add_argument("--ban-ip-file", type=str)
     parser.add_argument("--exclude-model-names", type=str, nargs="+")
     parser.add_argument("--password", type=str, default=None, nargs="+")
+    parser.add_argument("--arena-hard-leaderboard", type=str)
     args = parser.parse_args()
 
     logger = build_logger("monitor", "monitor.log")
@@ -907,7 +1017,9 @@ if __name__ == "__main__":
         )
         update_thread.start()
 
-    demo = build_demo(args.elo_results_file, args.leaderboard_table_file)
+    demo = build_demo(
+        args.elo_results_file, args.leaderboard_table_file, args.arena_hard_leaderboard
+    )
     demo.queue(
         default_concurrency_limit=args.concurrency_count,
         status_update_rate=10,
