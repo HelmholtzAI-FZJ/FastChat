@@ -580,7 +580,7 @@ def bot_response(
             "state": state.dict(),
             "ip": get_ip(request),
         }
-        fout.write(json.dumps(data) + "\n")
+        #fout.write(json.dumps(data) + "\n")
     #get_remote_logger().log(data)
 
 
