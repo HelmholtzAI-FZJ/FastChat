@@ -581,7 +581,7 @@ def bot_response(
             "ip": get_ip(request),
         }
         fout.write(json.dumps(data) + "\n")
-    get_remote_logger().log(data)
+    #get_remote_logger().log(data)
 
 
 block_css = """
