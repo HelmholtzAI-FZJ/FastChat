@@ -4,15 +4,25 @@ import gradio as gr
 
 from fastchat.constants import SURVEY_LINK
 
+deprecated_model_name = [
+    "gemini-1.5-pro-exp-0801",
+    "gemini-1.5-pro-api-0409-preview",
+    "bard-jan-24-gemini-pro",
+    "chatgpt-4o-latest-20240808",
+]
+
 key_to_category_name = {
     "full": "Overall",
+    "full_style_control": "Overall w/ Style Control",
     "dedup": "De-duplicate Top Redundant Queries (soon to be default)",
     "math": "Math",
     "if": "Instruction Following",
     "multiturn": "Multi-Turn",
     "coding": "Coding",
+    "coding_style_control": "Coding w/ Style Control",
     "hard_6": "Hard Prompts (Overall)",
     "hard_english_6": "Hard Prompts (English)",
+    "hard_6_style_control": "Hard Prompts (Overall) w/ Style Control",
     "long_user": "Longer Query",
     "english": "English",
     "chinese": "Chinese",
@@ -27,15 +37,20 @@ key_to_category_name = {
     "no_refusal": "Exclude Refusal",
     "overall_limit_5_user_vote": "overall_limit_5_user_vote",
     "full_old": "Overall (Deprecated)",
+    "full_style_control": "Overall (Style Control)",
+    "hard_6_style_control": "Hard Prompts (Overall) (Style Control)",
 }
 cat_name_to_explanation = {
     "Overall": "Overall Questions",
+    "Overall w/ Style Control": "Overall with Style Control",
     "De-duplicate Top Redundant Queries (soon to be default)": "De-duplicate top redundant queries (top 0.1%). See details in [blog post](https://lmsys.org/blog/2024-05-17-category-hard/#note-enhancing-quality-through-de-duplication).",
     "Math": "Math",
     "Instruction Following": "Instruction Following",
     "Multi-Turn": "Multi-Turn Conversation (>= 2 turns)",
     "Coding": "Coding: whether conversation contains code snippets",
+    "Coding w/ Style Control": "Coding with Style Control",
     "Hard Prompts (Overall)": "Hard Prompts (Overall): details in [blog post](https://lmsys.org/blog/2024-05-17-category-hard/)",
+    "Hard Prompts (Overall) w/ Style Control": "Hard Prompts (Overall) with Style Control",
     "Hard Prompts (English)": "Hard Prompts (English), note: the delta is to English Category. details in [blog post](https://lmsys.org/blog/2024-05-17-category-hard/)",
     "Longer Query": "Longer Query (>= 500 tokens)",
     "English": "English Prompts",
@@ -51,6 +66,8 @@ cat_name_to_explanation = {
     "Exclude Refusal": 'Exclude model responses with refusal (e.g., "I cannot answer")',
     "overall_limit_5_user_vote": "overall_limit_5_user_vote",
     "Overall (Deprecated)": "Overall without De-duplicating Top Redundant Queries (top 0.1%). See details in [blog post](https://lmsys.org/blog/2024-05-17-category-hard/#note-enhancing-quality-through-de-duplication).",
+    "Overall (Style Control)": "Overall Leaderboard with Style Control. See details in [blog post](https://lmsys.org/blog/2024-08-28-style-control/).",
+    "Hard Prompts (Overall) (Style Control)": "Hard Prompts (Overall) Leaderboard with Style Control. See details in [blog post](https://lmsys.org/blog/2024-08-28-style-control/).",
 }
 cat_name_to_baseline = {
     "Hard Prompts (English)": "English",

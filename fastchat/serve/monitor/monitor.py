@@ -28,6 +28,8 @@ from fastchat.utils import build_logger, get_window_url_params_js
 from fastchat.serve.monitor.monitor_md import (
     cat_name_to_baseline,
     key_to_category_name,
+    cat_name_to_explanation,
+    deprecated_model_name,
     arena_hard_title,
     make_default_md_1,
     make_default_md_2,
@@ -258,10 +260,14 @@ def create_ranking_str(ranking, ranking_difference):
         return f"{int(ranking)}"
 
 
-def get_arena_table(arena_df, model_table_df, arena_subset_df=None):
+def get_arena_table(arena_df, model_table_df, arena_subset_df=None, hidden_models=None):
     arena_df = arena_df.sort_values(
         by=["final_ranking", "rating"], ascending=[True, False]
     )
+
+    if hidden_models:
+        arena_df = arena_df[~arena_df.index.isin(hidden_models)].copy()
+
     arena_df["final_ranking"] = recompute_final_ranking(arena_df)
 
     if arena_subset_df is not None:
@@ -317,9 +323,11 @@ def get_arena_table(arena_df, model_table_df, arena_subset_df=None):
                 round(row["num_battles"]),
                 model_info.get("Organization", "Unknown"),
                 model_info.get("License", "Unknown"),
-                "Unknown"
-                if model_info.get("Knowledge cutoff date", "-") == "-"
-                else model_info.get("Knowledge cutoff date", "Unknown"),
+                (
+                    "Unknown"
+                    if model_info.get("Knowledge cutoff date", "-") == "-"
+                    else model_info.get("Knowledge cutoff date", "Unknown")
+                ),
             ]
         )
 
@@ -350,21 +358,25 @@ def update_leaderboard_df(arena_table_vals):
 
     def highlight_max(s):
         return [
-            "color: green; font-weight: bold"
-            if "\u2191" in str(v)
-            else "color: red; font-weight: bold"
-            if "\u2193" in str(v)
-            else ""
+            (
+                "color: green; font-weight: bold"
+                if "\u2191" in str(v)
+                else "color: red; font-weight: bold"
+                if "\u2193" in str(v)
+                else ""
+            )
             for v in s
         ]
 
     def highlight_rank_max(s):
         return [
-            "color: green; font-weight: bold"
-            if v > 0
-            else "color: red; font-weight: bold"
-            if v < 0
-            else ""
+            (
+                "color: green; font-weight: bold"
+                if v > 0
+                else "color: red; font-weight: bold"
+                if v < 0
+                else ""
+            )
             for v in s
         ]
 
@@ -398,7 +410,13 @@ def build_arena_tab(
 
     arena_df = arena_dfs["Overall"]
 
-    def update_leaderboard_and_plots(category):
+    def update_leaderboard_and_plots(category, filters):
+        if len(filters) > 0 and "Style Control" in filters:
+            if f"{category} (Style Control)" in arena_dfs:
+                category = f"{category} (Style Control)"
+            else:
+                gr.Warning("This category does not support style control.")
+
         arena_subset_df = arena_dfs[category]
         arena_subset_df = arena_subset_df[arena_subset_df["num_battles"] > 300]
         elo_subset_results = category_elo_results[category]
@@ -409,6 +427,11 @@ def build_arena_tab(
             arena_df,
             model_table_df,
             arena_subset_df=arena_subset_df if category != "Overall" else None,
+            hidden_models=(
+                None
+                if len(filters) > 0 and "Show Deprecate" in filters
+                else deprecated_model_name
+            ),
         )
         if category != "Overall":
             arena_values = update_leaderboard_df(arena_values)
@@ -490,7 +513,9 @@ def build_arena_tab(
     p4 = category_elo_results["Overall"]["average_win_rate_bar"]
 
     # arena table
-    arena_table_vals = get_arena_table(arena_df, model_table_df)
+    arena_table_vals = get_arena_table(
+        arena_df, model_table_df, hidden_models=deprecated_model_name
+    )
 
     md = make_arena_leaderboard_md(arena_df, last_updated_time, vision=vision)
     gr.Markdown(md, elem_id="leaderboard_markdown")
@@ -500,6 +525,10 @@ def build_arena_tab(
                 choices=list(arena_dfs.keys()),
                 label="Category",
                 value="Overall",
+            )
+        with gr.Column(scale=2):
+            category_checkbox = gr.CheckboxGroup(
+                ["Style Control", "Show Deprecate"], label="Apply filter", info=""
             )
         default_category_details = make_category_arena_leaderboard_md(
             arena_df, arena_df, name="Overall"
@@ -599,7 +628,21 @@ Note: in each category, we exclude models with fewer than 300 votes as their con
                 plot_2 = gr.Plot(p2, show_label=False)
     category_dropdown.change(
         update_leaderboard_and_plots,
-        inputs=[category_dropdown],
+        inputs=[category_dropdown, category_checkbox],
+        outputs=[
+            elo_display_df,
+            plot_1,
+            plot_2,
+            plot_3,
+            plot_4,
+            more_stats_md,
+            category_deets,
+        ],
+    )
+
+    category_checkbox.change(
+        update_leaderboard_and_plots,
+        inputs=[category_dropdown, category_checkbox],
         outputs=[
             elo_display_df,
             plot_1,
@@ -659,13 +702,19 @@ def get_arena_category_table(results_df, categories, metric="ranking"):
 
     def highlight_top_3(s):
         return [
-            "background-color: rgba(255, 215, 0, 0.5); text-align: center; font-size: 110%"
-            if v == 1 and v != 0
-            else "background-color: rgba(192, 192, 192, 0.5); text-align: center; font-size: 110%"
-            if v == 2 and v != 0
-            else "background-color: rgba(255, 165, 0, 0.5); text-align: center; font-size: 110%"
-            if v == 3 and v != 0
-            else "text-align: center; font-size: 110%"
+            (
+                "background-color: rgba(255, 215, 0, 0.5); text-align: center; font-size: 110%"
+                if v == 1 and v != 0
+                else (
+                    "background-color: rgba(192, 192, 192, 0.5); text-align: center; font-size: 110%"
+                    if v == 2 and v != 0
+                    else (
+                        "background-color: rgba(255, 165, 0, 0.5); text-align: center; font-size: 110%"
+                        if v == 3 and v != 0
+                        else "text-align: center; font-size: 110%"
+                    )
+                )
+            )
             for v in s
         ]
 
@@ -807,7 +856,14 @@ def build_leaderboard_tab(
         model_table_df = pd.DataFrame(data)
 
         with gr.Tabs() as tabs:
-            with gr.Tab("Ranking Breakdown", id=0):
+            with gr.Tab("Arena", id=0):
+                gr_plots = build_arena_tab(
+                    elo_results_text,
+                    model_table_df,
+                    default_md,
+                    show_plot=show_plot,
+                )
+            with gr.Tab("📣 NEW: Overview", id=1):
                 gr.Markdown(
                     f"""
                     <div style="text-align: center; font-weight: bold;">
@@ -826,7 +882,7 @@ def build_leaderboard_tab(
                     elem_id="leaderboard_markdown",
                 )
                 combined_table = get_combined_table(elo_results_text, model_table_df)
-                gr_plots = build_category_leaderboard_tab(
+                build_category_leaderboard_tab(
                     combined_table,
                     "Task",
                     selected_categories,
@@ -847,13 +903,6 @@ def build_leaderboard_tab(
             Note: in each category, we exclude models with fewer than 300 votes as their confidence intervals can be large.
             """,
                     elem_id="leaderboard_markdown",
-                )
-            with gr.Tab("Arena", id=1):
-                gr_plots = build_arena_tab(
-                    elo_results_text,
-                    model_table_df,
-                    default_md,
-                    show_plot=show_plot,
                 )
             with gr.Tab("Arena (Vision)", id=2):
                 build_arena_tab(
