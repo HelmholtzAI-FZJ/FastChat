@@ -2484,6 +2484,23 @@ class RekaAdapter(BaseModelAdapter):
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("api_based_default")
 
+class TrustLLMAdapter(BaseModelAdapter):
+    """The model adapter for TrustLLM models."""
+
+    use_fast_tokenizer = False
+
+    def match(self, model_path: str):
+        return "trustllm" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        model, tokenizer = super().load_model(model_path, from_pretrained_kwargs)
+        model.config.eos_token_id = tokenizer.eos_token_id
+        model.config.pad_token_id = tokenizer.pad_token_id
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("one_shot")
+
 
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
@@ -2587,6 +2604,7 @@ register_model_adapter(CllmAdapter)
 register_model_adapter(RekaAdapter)
 register_model_adapter(SmaugChatAdapter)
 register_model_adapter(Llama3Adapter)
+register_model_adapter(TrustLLMAdapter)
 
 # After all adapters, try the default base adapter.
 register_model_adapter(BaseModelAdapter)
