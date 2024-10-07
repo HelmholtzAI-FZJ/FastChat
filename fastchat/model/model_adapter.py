@@ -2505,6 +2505,7 @@ class TrustLLMAdapter(BaseModelAdapter):
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
 register_model_adapter(EvilAdapter)
+register_model_adapter(TrustLLMAdapter)
 register_model_adapter(PeftModelAdapter)
 register_model_adapter(StableVicunaAdapter)
 register_model_adapter(VicunaAdapter)
@@ -2604,7 +2605,6 @@ register_model_adapter(CllmAdapter)
 register_model_adapter(RekaAdapter)
 register_model_adapter(SmaugChatAdapter)
 register_model_adapter(Llama3Adapter)
-register_model_adapter(TrustLLMAdapter)
 
 # After all adapters, try the default base adapter.
 register_model_adapter(BaseModelAdapter)
