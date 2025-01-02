@@ -64,7 +64,6 @@ from fastchat.protocol.api_protocol import (
 from fastchat.utils import build_logger
 
 logger = build_logger("openai_api_server", "openai_api_server.log")
-
 conv_template_map = {}
 
 fetch_timeout = aiohttp.ClientTimeout(total=3 * 3600)
@@ -97,7 +96,8 @@ async def fetch_remote(url, pload=None, name=None):
 class AppSettings(BaseSettings):
     # The address of the model controller.
     controller_address: str = "http://localhost:21001"
-    authenticator_url: str = "https://codebase.helmholtz.cloud/api/v4/user"
+    authenticator_url: List[str] = ["https://codebase.helmholtz.cloud/api/v4/user",
+                                    "https://jupyter.jsc.fz-juelich.de/hub/api/user_oauth"]
     api_keys: Optional[List[str]] = None
 
 
@@ -127,10 +127,13 @@ async def check_api_key(
     else:
         # If I get here, I can have auth.credentials by calling  curl --header "Authorization: Bearer bla"
         if auth is not None and auth.credentials is not None:
-            headers = {"PRIVATE-TOKEN": auth.credentials}
-            response = httpx.get(app_settings.authenticator_url, headers=headers)
-            if response.status_code == 200:
-                return auth.credentials
+            # PRIVATE-TOKEN works on gitlab, but not on jupyterhub
+            # headers = {"PRIVATE-TOKEN": auth.credentials}
+            headers = {'Authorization': f'Bearer {auth.credentials}'}
+            for url in app_settings.authenticator_url:
+                response = httpx.get(url, headers=headers)
+                if response.status_code == 200:
+                    return auth.credentials
         raise HTTPException(
             status_code=401,
             detail={
