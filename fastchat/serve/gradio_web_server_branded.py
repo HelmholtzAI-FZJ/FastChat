@@ -801,9 +801,13 @@ def build_single_model_ui(models, add_promotion_links=True):
         chatbot = gr.Chatbot(
             elem_id="chatbot",
             label="This is what I have to say.... Remember: I am a BLABLADOR! Not all I say is true or even real",
-            height=300,
+            height=360,
             scale=2,
             show_copy_button=True,
+            resizeable=True,
+            placeholder="<center>Don't forget to check the parameters below! <p> You can make the model more or less creative by changing temperature and top_p, and longer answers increasing the number of tokens.</center>"
+            # layout="panel", 
+            # editable=True,
         )
     with gr.Row():
         textbox = gr.Textbox(
@@ -839,8 +843,8 @@ def build_single_model_ui(models, add_promotion_links=True):
         )
         max_output_tokens = gr.Slider(
             minimum=16,
-            maximum=32768,
-            value=1024,
+            maximum=65536,
+            value=4096,
             step=64,
             interactive=True,
             label="Max output tokens",
