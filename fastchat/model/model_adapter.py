@@ -2490,7 +2490,7 @@ class TrustLLMAdapter(BaseModelAdapter):
     use_fast_tokenizer = False
 
     def match(self, model_path: str):
-        return "trustllm" in model_path.lower()
+        keyword_list = ["athene-70b"]
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         model, tokenizer = super().load_model(model_path, from_pretrained_kwargs)
@@ -2500,6 +2500,19 @@ class TrustLLMAdapter(BaseModelAdapter):
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("one_shot")
+
+class NoSystemAdapter(BaseModelAdapter):
+    def match(self, model_path: str):
+        keyword_list = ["athene-70b", "p2l"]
+
+        for keyword in keyword_list:
+            if keyword == model_path.lower():
+                return True
+        return False
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("api_based_default")
+
 
 
 # Note: the registration order matters.
