@@ -396,8 +396,9 @@ def is_limit_reached(model_name, ip):
         obj = ret.json()
         return obj
     except Exception as e:
-        logger.info(f"monitor error: {e}")
-        return None
+        pass
+        # logger.info(f"monitor error: {e}")
+        # return None
 
 
 def bot_response(
@@ -436,9 +437,10 @@ def bot_response(
         api_endpoint_info[model_name] if model_name in api_endpoint_info else None
     )
     images = conv.get_images()
-
     if model_api_dict is None:
         # Query worker address
+        logger.info(f"2AAAXXX HERE {model_api_dict} !!!!!")
+
         ret = requests.post(
             controller_url + "/get_worker_address", json={"model": model_name}
         )
@@ -905,9 +907,9 @@ def build_demo(models):
         title="BLABLADOR - The experimental Helmholtz AI LLM server",
         theme=gr.themes.Base(),
         css=block_css,
+
     ) as demo:
         url_params = gr.JSON(visible=False)
-
         state, model_selector = build_single_model_ui(models)
 
         if args.model_list_mode not in ["once", "reload"]:
