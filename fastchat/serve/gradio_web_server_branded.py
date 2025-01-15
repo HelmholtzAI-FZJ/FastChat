@@ -58,7 +58,7 @@ use_remote_storage = False
 acknowledgment_md = """
 <img src="https://helmholtzai-fzj.github.io/FastChat/blablador.png" width="160" alt="Alex Strube\'s dog"><BR>
 Made with ❤️ by Helmholtz AI Jülich.<BR>
-Get in touch with us at <a href="mailto:blablador@fz-juelich.de">blablador@fz-juelich.de</a>.<BR>
+Get in touch with us at <a href="mailto:support@hifis.net?subject=[blablador] ">support@hifis.net</a>.<BR>
 API access (see <a href="https://sdlaml.pages.jsc.fz-juelich.de/ai/guides/blablador_api_access/">documentation</a>) is available too!<BR>
 You can also subscribe to our <a href="https://lists.fz-juelich.de/mailman/listinfo/blablador-news">blablador-news</a> mailing list!
 """
