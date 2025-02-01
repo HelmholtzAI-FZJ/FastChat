@@ -56,7 +56,7 @@ enable_moderation = False
 use_remote_storage = False
 
 acknowledgment_md = """
-<img src="https://helmholtzai-fzj.github.io/FastChat/blablador.png" width="160" alt="Alex Strube\'s dog"><BR>
+<img src="https://helmholtzai-fzj.github.io/FastChat/blablador-ng.svg" width="80" alt="Alex Strube\'s dog" class="dark-invert"><BR>
 Made with ❤️ by Helmholtz AI Jülich.<BR>
 Get in touch with us at <a href="mailto:support@hifis.net?subject=[blablador] ">support@hifis.net</a>.<BR>
 API access (see <a href="https://sdlaml.pages.jsc.fz-juelich.de/ai/guides/blablador_api_access/">documentation</a>) is available too!<BR>
@@ -341,7 +341,7 @@ def add_text(state, model_selector, text, image, request: gr.Request):
     text = _prepare_text_with_image(state, text, image, csam_flag=False)
     state.conv.append_message(state.conv.roles[0], text)
     state.conv.append_message(state.conv.roles[1], None)
-    return (state, state.to_gradio_chatbot(), "", None) + (disable_btn,) * 5
+    return (state, state.to_gradio_chatbot(), "", None) + (disable_btn,) * 2
 
 
 def model_worker_stream_iter(
@@ -521,9 +521,9 @@ def bot_response(
                 yield (state, state.to_gradio_chatbot()) + (
                     disable_btn,
                     disable_btn,
-                    disable_btn,
-                    enable_btn,
-                    enable_btn,
+                    # disable_btn,
+                    # enable_btn,
+                    # enable_btn,
                 )
                 return
         output = data["text"].strip()
@@ -537,9 +537,9 @@ def bot_response(
         yield (state, state.to_gradio_chatbot()) + (
             disable_btn,
             disable_btn,
-            disable_btn,
-            enable_btn,
-            enable_btn,
+            # disable_btn,
+            # enable_btn,
+            # enable_btn,
         )
         return
     except Exception as e:
@@ -550,9 +550,9 @@ def bot_response(
         yield (state, state.to_gradio_chatbot()) + (
             disable_btn,
             disable_btn,
-            disable_btn,
-            enable_btn,
-            enable_btn,
+            # disable_btn,
+            # enable_btn,
+            # enable_btn,
         )
         return
 
@@ -694,6 +694,16 @@ a:hover {
     text-decoration: underline; /* Adds underline on hover */
 }
 
+/* These are supposed to invert the image's color for blablador dark mode - it doesn't work yet */
+
+svg { fill=currentColor }
+@media (prefers-color-scheme: dark) {
+  .dark-invert {
+    filter: invert(1);
+  }
+}
+/* End of dark mode CSS */
+
 footer {visibility: hidden}
 """
 
@@ -761,7 +771,7 @@ We also thank [UC Berkeley SkyLab](https://sky.cs.berkeley.edu/), [Kaggle](https
 
 
 def build_single_model_ui(models, add_promotion_links=True):
-    blablador_logo = (
+    hai_logo = (
     '''
     <svg class="svg-hh-ai-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 458 36" fill="none" aria-labelledby="helmholtz-ai-logo-header" role="img">
 									<title id="helmholtz-logo-ai-header">Helmholtz AI Logo</title>
@@ -771,7 +781,7 @@ def build_single_model_ui(models, add_promotion_links=True):
 									</g></svg>
     '''
 )
-    blablador_logo = gr.HTML(blablador_logo)
+    hai_logo = gr.HTML(hai_logo)
 
     notice_markdown = f"""
 # This is _*BLABLADOR*_, our experimental large language model server! 🐕‍🦺
@@ -805,7 +815,8 @@ def build_single_model_ui(models, add_promotion_links=True):
             scale=2,
             show_copy_button=True,
             resizeable=True,
-            placeholder="<center>Don't forget to check the parameters below! <p> You can make the model more or less creative by changing temperature and top_p, and longer answers increasing the number of tokens.</center>"
+            placeholder="<center>Don't forget to check the parameters below! <p> You can make the model more or less creative by changing temperature and top_p, and longer answers increasing the number of tokens.</center>",
+            type='tuples',
             # layout="panel", 
             # editable=True,
         )
@@ -851,7 +862,7 @@ def build_single_model_ui(models, add_promotion_links=True):
         )
 
     if add_promotion_links:
-        gr.Markdown(acknowledgment_md, elem_id="ack_markdown")
+        gr.HTML(acknowledgment_md, elem_id="ack_markdown", elem_classes="dark-invert")
 
     # Register listeners
     imagebox = gr.State(None)
@@ -909,7 +920,10 @@ def build_single_model_ui(models, add_promotion_links=True):
 def build_demo(models):
     with gr.Blocks(
         title="BLABLADOR - The experimental Helmholtz AI LLM server",
-        theme=gr.themes.Base(),
+        theme=gr.themes.Base().set(
+            body_background_fill="white",
+            body_background_fill_dark="#202020",
+        ),
         css=block_css,
 
     ) as demo:
