@@ -2490,7 +2490,7 @@ class TrustLLMAdapter(BaseModelAdapter):
     use_fast_tokenizer = False
 
     def match(self, model_path: str):
-        return "trustllm" in model_path.lower()
+        keyword_list = ["athene-70b", "p2l"]
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         model, tokenizer = super().load_model(model_path, from_pretrained_kwargs)
