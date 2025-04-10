@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=GritLM-7B
+#SBATCH --job-name=ministral8
 #SBATCH --output=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --error=/p/haicluster/llama/FastChat/logs/%j.txt
 #SBATCH --nodes=1
@@ -8,7 +8,7 @@
 #SBATCH --gres=gpu:1
 # #SBATCH --time=100:00:00
 
-echo "I AM ON "$(hostname) " running GritLM-7B"
+echo "I AM ON "$(hostname) " running ministral 8"
 
 export BLABLADOR_DIR="/p/haicluster/llama/FastChat"
 source $BLABLADOR_DIR/config-blablador.sh
@@ -20,15 +20,21 @@ source $BLABLADOR_DIR/sc_venv_vllm8/activate.sh
 
 export PATH=$BLABLADOR_DIR:$PATH
 export PYTHONPATH=$BLABLADOR_DIR:$PYTHONPATH
-export NUMEXPR_MAX_THREADS=16
+export NUMEXPR_MAX_THREADS=8
 
-#srun python3 fastchat/serve/model_worker.py \
-srun python3 $BLABLADOR_DIR/fastchat/serve/model_worker.py \
+srun python3 $BLABLADOR_DIR/fastchat/serve/vllm_worker.py \
      --controller $BLABLADOR_CONTROLLER:$BLABLADOR_CONTROLLER_PORT \
-     --port 31011 --worker-address http://$(hostname).fz-juelich.de:31011 \
+     --port 31055 --worker-address http://$(hostname).fz-juelich.de:31055 \
      --num-gpus 1 \
      --host 0.0.0.0 \
-     --model-path models/GritLM-7B \
-     --model-name "alias-embeddings,gpt-3.5-turbo,text-davinci-003,text-embedding-ada-002,5 - GritLM-7B - For Chat AND Text Embeddings" \
+     --model-path models/Ministral-8B-Instruct-2410 \
+     --model-name "alias-fast,1 - Ministral 8b - the fast model" \
+     --max-model-len 24096 \
+     --gpu-memory-utilization 0.87
+
+     # --config-format mistral --load-format mistral --tokenizer-mode mistral \
+
      # --load-8bit It's faster without it 
+     # --distributed-executor-backend=ray \
      #     --max-gpu-memory 22Gb \
+     # "alias-fast,1 - Ministral 8b - the fast model" \
