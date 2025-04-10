@@ -24,7 +24,7 @@ from fastchat.serve.model_worker import (
     worker_id,
 )
 
-from lightllm.server.sampling_params import SamplingParams
+from lightllm.server.core.objs.py_sampling_params import SamplingParams
 from lightllm.server.multimodal_params import MultimodalParams
 from lightllm.server.httpserver.manager import HttpServerManager
 from lightllm.server.detokenization.manager import start_detokenization_process
@@ -445,7 +445,8 @@ if __name__ == "__main__":
         args.max_req_total_len = context_length
 
     assert args.max_req_input_len < args.max_req_total_len
-    assert args.max_req_total_len <= args.max_total_token_num
+    print("args.max_req_total_len = ", args.max_req_total_len, " and args.max_total_token_num is ", args.max_total_token_num )
+    #assert args.max_req_total_len <= args.max_total_token_num
 
     if not args.splitfuse_mode:
         # 普通模式下

@@ -33,9 +33,7 @@ build
 logs/*
 token
 models
-sc_venv_falcon
-sc_venv_vllm
-sc_venv_template
+sc_venv_*
 # Image data
 serve_images
 val2014
