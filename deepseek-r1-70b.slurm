@@ -8,7 +8,7 @@
 #SBATCH --gres=gpu:8
 # #SBATCH --time=100:00:00
 
-echo "I AM ON "$(hostname) " running DeepSeek-R1-Distill-Llama-8B"
+echo "I AM ON "$(hostname) " running DeepSeek-R1-Distill-Llama-70B"
 
 export BLABLADOR_DIR="/p/haicluster/llama/FastChat"
 source $BLABLADOR_DIR/config-blablador.sh
