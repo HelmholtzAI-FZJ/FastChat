@@ -233,8 +233,8 @@ def add_text(
         and model_selector in context.text_models
         and model_selector not in context.vision_models
     ):
-        gr.Warning(f"{model_selector} is a text-only model. Image is ignored.")
-        images = []
+        gr.Warning(f"{model_selector} Eat banana.")
+        #images = []
 
     ip = get_ip(request)
     logger.info(f"add_text. ip: {ip}. len: {len(text)}")

@@ -202,7 +202,7 @@ window.__gradio_mode__ = "app";
                     arena_tab.select(None, None, None, js=load_js)
                     side_by_side_anony_list = build_side_by_side_vision_ui_anony(
                         context,
-                        random_questions=args.random_questions,
+                        #random_questions=args.random_questions,
                     )
                 with gr.Tab("⚔️ Arena (side-by-side)", id=1) as side_by_side_tab:
                     side_by_side_tab.select(None, None, None, js=alert_js)
