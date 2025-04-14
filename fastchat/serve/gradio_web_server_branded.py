@@ -271,7 +271,7 @@ def clear_history(request: gr.Request):
     ip = get_ip(request)
     logger.info(f"clear_history. ip: {ip}")
     state = None
-    return (state, [], "", None) + (disable_btn,) * 5
+    return (state, [], "", None) + (disable_btn,) * 2
 
 
 def get_ip(request: gr.Request):
@@ -420,7 +420,7 @@ def bot_response(
     if state.skip_next:
         # This generate call is skipped due to invalid inputs
         state.skip_next = False
-        yield (state, state.to_gradio_chatbot()) + (no_change_btn,) * 5
+        yield (state, state.to_gradio_chatbot()) + (no_change_btn,) * 2
         return
 
     if apply_rate_limit:
@@ -429,7 +429,7 @@ def bot_response(
             error_msg = RATE_LIMIT_MSG + "\n\n" + ret["reason"]
             logger.info(f"rate limit reached. ip: {ip}. error_msg: {ret['reason']}")
             state.conv.update_last_message(error_msg)
-            yield (state, state.to_gradio_chatbot()) + (no_change_btn,) * 5
+            yield (state, state.to_gradio_chatbot()) + (no_change_btn,) * 2
             return
 
     conv, model_name = state.conv, state.model_name
@@ -439,8 +439,6 @@ def bot_response(
     images = conv.get_images()
     if model_api_dict is None:
         # Query worker address
-        logger.info(f"2AAAXXX HERE {model_api_dict} !!!!!")
-
         ret = requests.post(
             controller_url + "/get_worker_address", json={"model": model_name}
         )
@@ -505,7 +503,7 @@ def bot_response(
 
     # conv.update_last_message("▌")
     conv.update_last_message(html_code)
-    yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 5
+    yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 2
 
     try:
         data = {"text": ""}
@@ -514,7 +512,7 @@ def bot_response(
                 output = data["text"].strip()
                 # conv.update_last_message(output + "▌")
                 conv.update_last_message(output + html_code)
-                yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 5
+                yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 2
             else:
                 output = data["text"] + f"\n\n(error_code: {data['error_code']})"
                 conv.update_last_message(output)
@@ -528,7 +526,7 @@ def bot_response(
                 return
         output = data["text"].strip()
         conv.update_last_message(output)
-        yield (state, state.to_gradio_chatbot()) + (enable_btn,) * 5
+        yield (state, state.to_gradio_chatbot()) + (enable_btn,) * 2
     except requests.exceptions.RequestException as e:
         conv.update_last_message(
             f"{SERVER_ERROR_MSG}\n\n"
@@ -814,9 +812,9 @@ def build_single_model_ui(models, add_promotion_links=True):
             height=360,
             scale=2,
             show_copy_button=True,
-            resizeable=True,
             placeholder="<center>Don't forget to check the parameters below! <p> You can make the model more or less creative by changing temperature and top_p, and longer answers increasing the number of tokens.</center>",
             type='tuples',
+            resizeable=True,
             # layout="panel", 
             # editable=True,
         )
