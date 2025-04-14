@@ -60,7 +60,7 @@ acknowledgment_md = """
 Made with ❤️ by Helmholtz AI Jülich.<BR>
 Get in touch with us at <a href="mailto:support@hifis.net?subject=[blablador] ">support@hifis.net</a>.<BR>
 API access (see <a href="https://sdlaml.pages.jsc.fz-juelich.de/ai/guides/blablador_api_access/">documentation</a>) is available too!<BR>
-You can also subscribe to our <a href="https://lists.fz-juelich.de/mailman/listinfo/blablador-news">blablador-news</a> mailing list!
+You can also subscribe to our <a href="https://lists.fz-juelich.de/postorius/lists/blablador-news.lists.fz-juelich.de/">blablador-news</a> mailing list!
 """
 
 # JSON file format of API-based models:
@@ -810,7 +810,7 @@ def build_single_model_ui(models, add_promotion_links=True):
 
         chatbot = gr.Chatbot(
             elem_id="chatbot",
-            label="This is what I have to say.... Remember: I am a BLABLADOR! Not all I say is true or even real",
+            label="Remember: I am a BLABLADOR! Not all I say is true or even real. All output here is AI-Generated",
             height=360,
             scale=2,
             show_copy_button=True,
