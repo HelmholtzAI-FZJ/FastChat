@@ -183,13 +183,12 @@ def get_model_list(controller_url, register_api_endpoint_file, vision_arena):
         if mdl_dict["anony_only"]:
             visible_models.remove(mdl)
 
-
     # Sort models and add descriptions
     priority = {k: f"___{i:03d}" for i, k in enumerate(model_info)}
     models.sort(key=lambda x: priority.get(x, x))
     visible_models.sort(key=lambda x: priority.get(x, x))
-    logger.info(f"All models: {models}")
-    logger.info(f"Visible models: {visible_models}")
+    # logger.info(f"All models: {models}")
+    # logger.info(f"Visible models: {visible_models}")
     return visible_models, models
 
 
@@ -209,7 +208,7 @@ def load_demo(url_params, request: gr.Request):
     global models
 
     ip = get_ip(request)
-    logger.info(f"load_demo. ip: {ip}. params: {url_params}")
+    # logger.info(f"load_demo. ip: {ip}. params: {url_params}")
 
     if args.model_list_mode == "reload":
         models, all_models = get_model_list(
@@ -269,7 +268,6 @@ def regenerate(state, request: gr.Request):
 
 def clear_history(request: gr.Request):
     ip = get_ip(request)
-    logger.info(f"clear_history. ip: {ip}")
     state = None
     return (state, [], "", None) + (disable_btn,) * 2
 
@@ -312,7 +310,6 @@ def _prepare_text_with_image(state, text, images, csam_flag):
 
 def add_text(state, model_selector, text, image, request: gr.Request):
     ip = get_ip(request)
-    logger.info(f"add_text. ip: {ip}. len: {len(text)}")
 
     if state is None:
         state = State(model_selector)
@@ -324,7 +321,6 @@ def add_text(state, model_selector, text, image, request: gr.Request):
     all_conv_text = state.conv.get_prompt()
     all_conv_text = all_conv_text[-2000:] + "\nuser: " + text
     flagged = moderation_filter(all_conv_text, [state.model_name])
-    # flagged = moderation_filter(text, [state.model_name])
     if flagged:
         logger.info(f"violate moderation. ip: {ip}. text: {text}")
         # overwrite the original text
@@ -368,8 +364,6 @@ def model_worker_stream_iter(
         "echo": False,
     }
 
-    logger.info(f"==== request ====\n{gen_params}")
-
     if len(images) > 0:
         gen_params["images"] = images
 
@@ -411,7 +405,6 @@ def bot_response(
     use_recommended_config=False,
 ):
     ip = get_ip(request)
-    logger.info(f"bot_response. ip: {ip}")
     start_tstamp = time.time()
     temperature = float(temperature)
     top_p = float(top_p)
@@ -443,7 +436,6 @@ def bot_response(
             controller_url + "/get_worker_address", json={"model": model_name}
         )
         worker_addr = ret.json()["address"]
-        logger.info(f"model_name: {model_name}, worker_addr: {worker_addr}")
 
         # No available worker
         if worker_addr == "":
@@ -555,7 +547,6 @@ def bot_response(
         return
 
     finish_tstamp = time.time()
-    logger.info(f"{output}")
 
     conv.save_new_images(
         has_csam_images=state.has_csam_image, use_remote_storage=use_remote_storage
@@ -814,7 +805,7 @@ def build_single_model_ui(models, add_promotion_links=True):
             show_copy_button=True,
             placeholder="<center>Don't forget to check the parameters below! <p> You can make the model more or less creative by changing temperature and top_p, and longer answers increasing the number of tokens.</center>",
             type='tuples',
-            resizeable=True,
+            resizable=True,
             # layout="panel", 
             # editable=True,
         )
