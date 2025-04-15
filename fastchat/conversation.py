@@ -11,8 +11,6 @@ from enum import auto, IntEnum
 from io import BytesIO
 import os
 from typing import List, Any, Dict, Union, Tuple
-import logging
-logger = logging.getLogger(__name__)
 
 class SeparatorStyle(IntEnum):
     """Separator styles."""
@@ -373,7 +371,6 @@ class Conversation:
 
     def get_system_message(self, is_vision=False):
         """return the system message."""
-        logger.info(f"THIS IS THE SYSTEM PROMPT: {self.system_message}")
         if is_vision and self.system_message_vision:
             return self.system_message_vision
         return self.system_message
@@ -759,7 +756,14 @@ register_conv_template(
         system_message="A chat between a curious human and an artificial intelligence assistant. "
         "The assistant gives helpful, detailed, and polite answers to the human's questions.",
         roles=("Human", "Assistant"),
-#         messages=(""
+        sep_style=SeparatorStyle.ADD_COLON_SINGLE,
+        sep="\n### ",
+        stop_str="###",
+    )        
+#         system_message="A chat between a curious human and an artificial intelligence assistant. "
+#         "The assistant gives helpful, detailed, and polite answers to the human's questions.",
+#         roles=("Human", "Assistant"),
+#         messages=(
 #             (
 #                 "Human",
 #                 "Got any creative ideas for a 10 year old’s birthday?",
@@ -776,13 +780,13 @@ register_conv_template(
 # 7. Superhero Training Camp: Create a superhero-themed party where the kids can engage in fun training activities. Set up an obstacle course, have them design their own superhero capes or masks, and organize superhero-themed games and challenges.
 # 8. Outdoor Adventure: Plan an outdoor adventure party at a local park or nature reserve. Arrange activities like hiking, nature scavenger hunts, or a picnic with games. Encourage exploration and appreciation for the outdoors.
 # Remember to tailor the activities to the birthday child's interests and preferences. Have a great celebration!""",
-#             ""),
+#             ),
 #         ),
-        offset=2,
-        sep_style=SeparatorStyle.ADD_COLON_SINGLE,
-        sep="\n### ",
-        stop_str="###",
-    )
+#         offset=2,
+#         sep_style=SeparatorStyle.ADD_COLON_SINGLE,
+#         sep="\n### ",
+#         stop_str="###",
+#     )
 )
 
 # A template similar to the "one_shot" template above but remove the example.
