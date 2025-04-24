@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd $HOME/Devel/FastChat
+cd $HOME/FastChat
 source sc_venv_template/activate.sh
 
 python3 fastchat/serve/gradio_web_server_branded.py \
