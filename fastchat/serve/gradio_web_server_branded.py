@@ -60,7 +60,7 @@ acknowledgment_md = """
 Made with ❤️ by Helmholtz AI Jülich.<BR>
 Get in touch with us at <a href="mailto:support@hifis.net?subject=[blablador] ">support@hifis.net</a>.<BR>
 API access (see <a href="https://sdlaml.pages.jsc.fz-juelich.de/ai/guides/blablador_api_access/">documentation</a>) is available too!<BR>
-You can also subscribe to our <a href="https://lists.fz-juelich.de/mailman/listinfo/blablador-news">blablador-news</a> mailing list!
+You can also subscribe to our <a href="https://lists.fz-juelich.de/postorius/lists/blablador-news.lists.fz-juelich.de/">blablador-news</a> mailing list!
 """
 
 # JSON file format of API-based models:
@@ -183,13 +183,12 @@ def get_model_list(controller_url, register_api_endpoint_file, vision_arena):
         if mdl_dict["anony_only"]:
             visible_models.remove(mdl)
 
-
     # Sort models and add descriptions
     priority = {k: f"___{i:03d}" for i, k in enumerate(model_info)}
     models.sort(key=lambda x: priority.get(x, x))
     visible_models.sort(key=lambda x: priority.get(x, x))
-    logger.info(f"All models: {models}")
-    logger.info(f"Visible models: {visible_models}")
+    # logger.info(f"All models: {models}")
+    # logger.info(f"Visible models: {visible_models}")
     return visible_models, models
 
 
@@ -209,7 +208,7 @@ def load_demo(url_params, request: gr.Request):
     global models
 
     ip = get_ip(request)
-    logger.info(f"load_demo. ip: {ip}. params: {url_params}")
+    # logger.info(f"load_demo. ip: {ip}. params: {url_params}")
 
     if args.model_list_mode == "reload":
         models, all_models = get_model_list(
@@ -269,9 +268,8 @@ def regenerate(state, request: gr.Request):
 
 def clear_history(request: gr.Request):
     ip = get_ip(request)
-    logger.info(f"clear_history. ip: {ip}")
     state = None
-    return (state, [], "", None) + (disable_btn,) * 5
+    return (state, [], "", None) + (disable_btn,) * 2
 
 
 def get_ip(request: gr.Request):
@@ -312,7 +310,6 @@ def _prepare_text_with_image(state, text, images, csam_flag):
 
 def add_text(state, model_selector, text, image, request: gr.Request):
     ip = get_ip(request)
-    logger.info(f"add_text. ip: {ip}. len: {len(text)}")
 
     if state is None:
         state = State(model_selector)
@@ -324,7 +321,6 @@ def add_text(state, model_selector, text, image, request: gr.Request):
     all_conv_text = state.conv.get_prompt()
     all_conv_text = all_conv_text[-2000:] + "\nuser: " + text
     flagged = moderation_filter(all_conv_text, [state.model_name])
-    # flagged = moderation_filter(text, [state.model_name])
     if flagged:
         logger.info(f"violate moderation. ip: {ip}. text: {text}")
         # overwrite the original text
@@ -368,8 +364,6 @@ def model_worker_stream_iter(
         "echo": False,
     }
 
-    logger.info(f"==== request ====\n{gen_params}")
-
     if len(images) > 0:
         gen_params["images"] = images
 
@@ -411,7 +405,6 @@ def bot_response(
     use_recommended_config=False,
 ):
     ip = get_ip(request)
-    logger.info(f"bot_response. ip: {ip}")
     start_tstamp = time.time()
     temperature = float(temperature)
     top_p = float(top_p)
@@ -420,7 +413,7 @@ def bot_response(
     if state.skip_next:
         # This generate call is skipped due to invalid inputs
         state.skip_next = False
-        yield (state, state.to_gradio_chatbot()) + (no_change_btn,) * 5
+        yield (state, state.to_gradio_chatbot()) + (no_change_btn,) * 2
         return
 
     if apply_rate_limit:
@@ -429,7 +422,7 @@ def bot_response(
             error_msg = RATE_LIMIT_MSG + "\n\n" + ret["reason"]
             logger.info(f"rate limit reached. ip: {ip}. error_msg: {ret['reason']}")
             state.conv.update_last_message(error_msg)
-            yield (state, state.to_gradio_chatbot()) + (no_change_btn,) * 5
+            yield (state, state.to_gradio_chatbot()) + (no_change_btn,) * 2
             return
 
     conv, model_name = state.conv, state.model_name
@@ -439,13 +432,10 @@ def bot_response(
     images = conv.get_images()
     if model_api_dict is None:
         # Query worker address
-        logger.info(f"2AAAXXX HERE {model_api_dict} !!!!!")
-
         ret = requests.post(
             controller_url + "/get_worker_address", json={"model": model_name}
         )
         worker_addr = ret.json()["address"]
-        logger.info(f"model_name: {model_name}, worker_addr: {worker_addr}")
 
         # No available worker
         if worker_addr == "":
@@ -505,7 +495,7 @@ def bot_response(
 
     # conv.update_last_message("▌")
     conv.update_last_message(html_code)
-    yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 5
+    yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 2
 
     try:
         data = {"text": ""}
@@ -514,7 +504,7 @@ def bot_response(
                 output = data["text"].strip()
                 # conv.update_last_message(output + "▌")
                 conv.update_last_message(output + html_code)
-                yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 5
+                yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 2
             else:
                 output = data["text"] + f"\n\n(error_code: {data['error_code']})"
                 conv.update_last_message(output)
@@ -528,7 +518,7 @@ def bot_response(
                 return
         output = data["text"].strip()
         conv.update_last_message(output)
-        yield (state, state.to_gradio_chatbot()) + (enable_btn,) * 5
+        yield (state, state.to_gradio_chatbot()) + (enable_btn,) * 2
     except requests.exceptions.RequestException as e:
         conv.update_last_message(
             f"{SERVER_ERROR_MSG}\n\n"
@@ -557,7 +547,6 @@ def bot_response(
         return
 
     finish_tstamp = time.time()
-    logger.info(f"{output}")
 
     conv.save_new_images(
         has_csam_images=state.has_csam_image, use_remote_storage=use_remote_storage
@@ -810,13 +799,13 @@ def build_single_model_ui(models, add_promotion_links=True):
 
         chatbot = gr.Chatbot(
             elem_id="chatbot",
-            label="This is what I have to say.... Remember: I am a BLABLADOR! Not all I say is true or even real",
+            label="Remember: I am a BLABLADOR! Not all I say is true or even real. All output here is AI-Generated",
             height=360,
             scale=2,
             show_copy_button=True,
-            resizeable=True,
             placeholder="<center>Don't forget to check the parameters below! <p> You can make the model more or less creative by changing temperature and top_p, and longer answers increasing the number of tokens.</center>",
             type='tuples',
+            resizable=True,
             # layout="panel", 
             # editable=True,
         )
