@@ -242,6 +242,14 @@ def check_requests(request) -> Optional[JSONResponse]:
             ErrorCode.PARAM_OUT_OF_RANGE,
             f"{request.stop} is not valid under any of the given schemas - 'stop'",
         )
+    if request.seed is not None and (
+        not isinstance(request.seed, int) or request.seed < 0
+    ):
+        return create_error_response(
+            ErrorCode.PARAM_OUT_OF_RANGE,
+            f"{request.seed} is not a nonnegative integer",
+        )
+
 
     return None
 
@@ -300,6 +308,7 @@ async def get_gen_params(
     stop: Optional[Union[str, List[str]]],
     best_of: Optional[int] = None,
     use_beam_search: Optional[bool] = None,
+    seed: Optional[int] = None,
 ) -> Dict[str, Any]:
     conv = await get_conv(model_name, worker_addr)
     conv = Conversation(
@@ -365,6 +374,7 @@ async def get_gen_params(
         "max_new_tokens": max_tokens,
         "echo": echo,
         "stop_token_ids": conv.stop_token_ids,
+        "seed": seed,
     }
 
     if len(images) > 0:
@@ -453,6 +463,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
         max_tokens=request.max_tokens,
         echo=False,
         stop=request.stop,
+        seed=request.seed,
     )
 
     max_new_tokens, error_check_ret = await check_length(
@@ -605,6 +616,7 @@ async def create_completion(request: CompletionRequest):
                 stop=request.stop,
                 best_of=request.best_of,
                 use_beam_search=request.use_beam_search,
+                seed=request.seed,
             )
             for i in range(request.n):
                 content = asyncio.create_task(
@@ -661,6 +673,7 @@ async def generate_completion_stream_generator(
                 logprobs=request.logprobs,
                 echo=request.echo,
                 stop=request.stop,
+                seed=request.seed,
             )
             async for content in generate_completion_stream(gen_params, worker_addr):
                 if content["error_code"] != 0:
@@ -843,6 +856,7 @@ async def create_chat_completion(request: APIChatCompletionRequest):
         max_tokens=request.max_tokens,
         echo=False,
         stop=request.stop,
+        seed=request.seed,
     )
 
     if request.repetition_penalty is not None:
