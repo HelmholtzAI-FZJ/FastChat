@@ -1924,7 +1924,7 @@ register_conv_template(
 # source: https://huggingface.co/Qwen/Qwen-7B-Chat/blob/main/qwen_generation_utils.py#L130
 register_conv_template(
     Conversation(
-        name="qwen-7b-chat",
+        name="Qwen3-235B-A22B-FP8",
         system_template="<|im_start|>system\n{system_message}",
         system_message="You are a helpful assistant.",
         roles=("<|im_start|>user", "<|im_start|>assistant"),
